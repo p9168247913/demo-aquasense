@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
 
 import {
@@ -56,6 +56,7 @@ import WidgetsBrand from '../widgets/WidgetsBrand'
 import WidgetsDropdown from '../widgets/WidgetsDropdown'
 import MainChart from './MainChart'
 import { Line, Bar, PolarArea, Radar, Doughnut } from 'react-chartjs-2';
+import Thermometer from 'react-thermometer-component';
 
 const Dashboard = () => {
 
@@ -139,7 +140,7 @@ const Dashboard = () => {
           'rgba(75, 192, 192, 1)',
         ],
         borderWidth: 1,
-        data: [25, 50, 30], // Replace with your pH data percentage (sum should be 100%)
+        data: [4.2, 7, 12], // Replace with your pH data percentage (sum should be 100%)
       },
     ],
   };
@@ -148,22 +149,22 @@ const Dashboard = () => {
     scales: {
       r: {
         suggestedMin: 0,
-        suggestedMax: 100,
+        suggestedMax: 14,
       },
     },
   };
 
-  const [showTDS, setShowTDS] = useState(false); // State to toggle between EC and TDS
+  const [showTDS, setShowTDS] = useState(false);
 
   const electricalConductivityData = {
     labels: ['Parameter 1', 'Parameter 2', 'Parameter 3', 'Parameter 4', 'Parameter 5'],
     datasets: [
       {
-        label: showTDS ? 'TDS (ppm)' : 'EC (uS/cm)', // Toggle label based on state
+        label: showTDS ? 'TDS (ppm)' : 'EC (uS/cm)',
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
-        data: showTDS ? [150, 160, 140, 165, 155] : [75, 80, 70, 85, 78], // EC and TDS data
+        data: showTDS ? [150, 160, 140, 165, 155] : [75, 80, 70, 85, 78],
       },
     ],
   };
@@ -171,7 +172,7 @@ const Dashboard = () => {
   const options3 = {
     scales: {
       r: {
-        suggestedMin: showTDS ? 100 : 60, // Adjust min and max based on EC or TDS
+        suggestedMin: showTDS ? 100 : 60,
         suggestedMax: showTDS ? 200 : 90,
       },
     },
@@ -223,7 +224,57 @@ const Dashboard = () => {
         suggestedMax: 2,
       },
     },
-  };;
+  };
+
+  const temperatureData = {
+    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM', '03:00 PM', '06:00 PM'],
+    datasets: [
+      {
+        label: 'Water Temperature (°C)',
+        fill: true,
+        lineTension: 0.1,
+        backgroundColor: 'rgba(255, 159, 64, 0.2)', // Custom color
+        borderColor: 'rgba(255, 159, 64, 1)', // Custom color
+        borderCapStyle: 'butt',
+        borderDash: [],
+        borderDashOffset: 0.0,
+        borderJoinStyle: 'miter',
+        pointBorderColor: 'rgba(255, 159, 64, 1)', // Custom color
+        pointBackgroundColor: '#fff',
+        pointBorderWidth: 1,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: 'rgba(255, 159, 64, 1)', // Custom color
+        pointHoverBorderColor: 'rgba(220,220,220,1)',
+        pointHoverBorderWidth: 2,
+        pointRadius: 1,
+        pointHitRadius: 10,
+        data: [20, 21, 22, 23, 24, 25, 26], // Replace with your actual temperature data
+      },
+    ],
+  };
+
+  const options5 = {
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Time',
+        },
+      },
+      y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Temperature (°C)',
+        },
+        suggestedMin: 18,
+        suggestedMax: 28, // Adjust based on your data range
+      },
+    },
+  };
+
+  const temperature = 72
 
   return (
     <>
@@ -252,7 +303,7 @@ const Dashboard = () => {
             </CCol>
           </CRow>
           <CRow>
-            <CCol>
+            <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
                 pH
               </h4>
@@ -261,7 +312,7 @@ const Dashboard = () => {
                 <PolarArea data={data2} options={options2} />
               </div>
             </CCol>
-            <CCol>
+            <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
                 Electric Conductivity / TDS
               </h4>
@@ -283,12 +334,12 @@ const Dashboard = () => {
                 </CButtonGroup>
               </div>
               <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
-                <Radar data={electricalConductivityData} options={options3} />
+                <Line data={electricalConductivityData} options={options3} />
               </div>
             </CCol>
           </CRow>
           <CRow>
-            <CCol>
+            <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
                 Pressure
               </h4>
@@ -296,6 +347,28 @@ const Dashboard = () => {
               <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
                 <Line data={data4} options={options4} />
               </div>
+            </CCol>
+            <CCol sm={6}>
+              <h4 id="traffic" className="card-title mb-0">
+                Temperature
+              </h4>
+              <div className="small text-body-secondary">January - July 2024</div>
+              {/* <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
+                <Line data={temperatureData} options={options5} />
+              </div> */}
+              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px', marginLeft:'100px' }}>
+                <Thermometer
+                  theme="light"
+                  value={temperature}
+                  max="100"
+                  steps="3"
+                  format="°C"
+                  size="medium"
+                  height="250"
+                  width="100"
+                />
+              </div>
+              <div className="current-temperature ml-3">{temperature} °C</div>
             </CCol>
           </CRow>
         </CCardBody>

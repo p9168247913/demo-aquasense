@@ -1,5 +1,7 @@
 import React from 'react'
 import Analytics from './components/Analytics/Analytics'
+import MotorControl from './components/MotorControl/MotorControl'
+import Profile from './components/Profile/Profile'
 import Dashboard1 from './views/dashboard/Dashboard1'
 
 const Dashboard = React.lazy(() => import('./views/dashboard/Dashboard'))
@@ -58,6 +60,9 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   // { path: '/dashboard', name: 'Dashboard1', element: Dashboard1 },
   { path: '/analytics', name: 'Analytics', element: Analytics },
+  { path: '/motor-control', name: 'Motor Control', element: MotorControl },
+  { path: '/profile', name: 'Profile', element: Profile },
+  
   { path: '/theme', name: 'Theme', element: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', element: Colors },
   { path: '/theme/typography', name: 'Typography', element: Typography },

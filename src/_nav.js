@@ -13,6 +13,7 @@ import {
   cilSpeedometer,
   cilGraph,
   cilStar,
+  cilUser,
 } from '@coreui/icons'
 import { CNavGroup, CNavItem, CNavTitle } from '@coreui/react'
 
@@ -32,11 +33,20 @@ const _nav = [
     name: 'Analytics',
     to: '/analytics',
     icon: <CIcon icon={cilGraph} customClassName="nav-icon" />,
-    // badge: {
-    //   color: 'info',
-    //   text: 'NEW',
-    // },
   },
+  {
+    component: CNavItem,
+    name: 'Motor Control',
+    to: '/motor-control',
+    icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
+  },
+  {
+    component: CNavItem,
+    name: 'Profile',
+    to: '/profile',
+    icon: <CIcon icon={cilUser} customClassName="nav-icon" />,
+  },
+
   // Theme
   // {
   //   component: CNavTitle,
@@ -282,7 +292,6 @@ const _nav = [
   //     text: 'NEW',
   //   },
   // },
-
 
   // Extras
   // {

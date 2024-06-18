@@ -1,60 +1,16 @@
 import React, { useState } from 'react'
-import classNames from 'classnames'
 
 import {
-  CAvatar,
   CButton,
   CButtonGroup,
   CCard,
   CCardBody,
-  CCardFooter,
-  CCardHeader,
   CCol,
-  CProgress,
   CRow,
-  CTable,
-  CTableBody,
-  CTableDataCell,
-  CTableHead,
-  CTableHeaderCell,
-  CTableRow,
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import {
-  cibCcAmex,
-  cibCcApplePay,
-  cibCcMastercard,
-  cibCcPaypal,
-  cibCcStripe,
-  cibCcVisa,
-  cibGoogle,
-  cibFacebook,
-  cibLinkedin,
-  cifBr,
-  cifEs,
-  cifFr,
-  cifIn,
-  cifPl,
-  cifUs,
-  cibTwitter,
-  cilCloudDownload,
-  cilPeople,
-  cilUser,
-  cilUserFemale,
-} from '@coreui/icons'
+
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
-
-import avatar1 from 'src/assets/images/avatars/1.jpg'
-import avatar2 from 'src/assets/images/avatars/2.jpg'
-import avatar3 from 'src/assets/images/avatars/3.jpg'
-import avatar4 from 'src/assets/images/avatars/4.jpg'
-import avatar5 from 'src/assets/images/avatars/5.jpg'
-import avatar6 from 'src/assets/images/avatars/6.jpg'
-
-import WidgetsBrand from '../widgets/WidgetsBrand'
-import WidgetsDropdown from '../widgets/WidgetsDropdown'
-import MainChart from './MainChart'
 import { Line, Bar, PolarArea, Radar, Doughnut } from 'react-chartjs-2';
 import Thermometer from 'react-thermometer-component';
 
@@ -68,7 +24,7 @@ const Dashboard = () => {
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 2,
-        data: [1.2, 1.4, 1.1, 1.3, 1.0, 1.5, 1.2], // Replace with your Chlorine data
+        data: [1.2, 1.4, 1.1, 1.3, 1.0, 1.5, 1.2],
       },
     ],
   };
@@ -87,7 +43,7 @@ const Dashboard = () => {
           text: 'Chlorine (mg/l)',
         },
         suggestedMin: 0,
-        suggestedMax: 2, // Adjust based on your data range
+        suggestedMax: 2,
       },
     },
   };
@@ -100,7 +56,7 @@ const Dashboard = () => {
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 2,
-        data: [15, 18, 17, 16, 19, 20], // Replace with your TSS data
+        data: [15, 18, 17, 16, 19, 20],
       },
     ],
   };
@@ -119,37 +75,63 @@ const Dashboard = () => {
           text: 'TSS (mg/l)',
         },
         suggestedMin: 0,
-        suggestedMax: 25, // Adjust based on your data range
+        suggestedMax: 25,
       },
     },
   };
 
-  const data2 = {
-    labels: ['Acidic', 'Neutral', 'Alkaline'],
+  const phValue = 7;
+  let phColor;
+
+  if (phValue < 7) {
+    phColor = 'rgba(255, 99, 132, 0.5)';
+  } else if (phValue === 7) {
+    phColor = 'rgba(255, 206, 86, 0.5)';
+  } else {
+    phColor = 'rgba(75, 192, 192, 0.5)';
+  }
+
+  const phData = {
+    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
     datasets: [
       {
-        label: 'pH Levels',
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.5)',
-          'rgba(54, 162, 235, 0.5)',
-          'rgba(75, 192, 192, 0.5)',
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(75, 192, 192, 1)',
-        ],
+        label: 'pH Level',
+        data: [4.2, 7, 12, 6, 8], // Example pH values corresponding to timestamps
+        fill: false,
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
-        data: [4.2, 7, 12], // Replace with your pH data percentage (sum should be 100%)
+        pointBackgroundColor: (context) => {
+          const phValue = context.dataset.data[context.dataIndex];
+          return phValue < 7 ? 'rgba(255, 99, 132, 1)' : phValue === 7 ? 'rgba(255, 206, 86, 1)' : 'rgba(75, 192, 192, 1)';
+        },
+        pointBorderColor: 'rgba(75, 192, 192, 1)',
       },
     ],
   };
 
-  const options2 = {
+  const phOptions = {
+    indexAxis: 'y',
     scales: {
-      r: {
-        suggestedMin: 0,
-        suggestedMax: 14,
+      x: {
+        title: {
+          display: true,
+          text: 'pH Level',
+        },
+        beginAtZero: true,
+        max: 14,
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Category',
+        },
+        stacked: true,
+      },
+    },
+    plugins: {
+      legend: {
+        display: true,
       },
     },
   };
@@ -157,7 +139,7 @@ const Dashboard = () => {
   const [showTDS, setShowTDS] = useState(false);
 
   const electricalConductivityData = {
-    labels: ['Parameter 1', 'Parameter 2', 'Parameter 3', 'Parameter 4', 'Parameter 5'],
+    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
     datasets: [
       {
         label: showTDS ? 'TDS (ppm)' : 'EC (uS/cm)',
@@ -179,7 +161,7 @@ const Dashboard = () => {
   };
 
   const data4 = {
-    labels: ['Site 1', 'Site 2', 'Site 3', 'Site 4', 'Site 5'],
+    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
     datasets: [
       {
         label: 'Pressure (Bar)',
@@ -302,43 +284,7 @@ const Dashboard = () => {
               </div>
             </CCol>
           </CRow>
-          <CRow>
-            <CCol sm={6}>
-              <h4 id="traffic" className="card-title mb-0">
-                pH
-              </h4>
-              <div className="small text-body-secondary">January - July 2024</div>
-              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
-                <PolarArea data={data2} options={options2} />
-              </div>
-            </CCol>
-            <CCol sm={6}>
-              <h4 id="traffic" className="card-title mb-0">
-                Electric Conductivity / TDS
-              </h4>
-              <div className="small text-body-secondary">January - July 2024</div>
-              <div className="d-flex justify-content-end mb-2">
-                <CButtonGroup>
-                  <CButton
-                    color={showTDS ? 'outline-primary' : 'primary'}
-                    onClick={() => setShowTDS(false)}
-                  >
-                    EC
-                  </CButton>
-                  <CButton
-                    color={showTDS ? 'primary' : 'outline-primary'}
-                    onClick={() => setShowTDS(true)}
-                  >
-                    TDS
-                  </CButton>
-                </CButtonGroup>
-              </div>
-              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
-                <Line data={electricalConductivityData} options={options3} />
-              </div>
-            </CCol>
-          </CRow>
-          <CRow>
+          <CRow className='mt-4'>
             <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
                 Pressure
@@ -348,6 +294,44 @@ const Dashboard = () => {
                 <Line data={data4} options={options4} />
               </div>
             </CCol>
+
+            <CCol sm={6}>
+              <div className='d-flex gap-4'>
+                <div>
+                  <h4 id="traffic" className="card-title mb-0">
+                    Electric Conductivity / TDS
+                  </h4>
+                  <div className="small text-body-secondary">January - July 2024</div>
+                </div>
+                <div className="d-flex justify-content-end mb-2">
+                  <CButtonGroup>
+                    <CButton
+                      color={showTDS ? 'outline-primary' : 'primary'}
+                      onClick={() => setShowTDS(false)}
+                    >
+                      EC
+                    </CButton>
+                    <CButton
+                      color={showTDS ? 'primary' : 'outline-primary'}
+                      onClick={() => setShowTDS(true)}
+                    >
+                      TDS
+                    </CButton>
+                  </CButtonGroup>
+                </div>
+              </div>
+              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
+                <Line data={electricalConductivityData} options={options3} />
+              </div>
+            </CCol>
+          </CRow>
+          <CRow className='mt-4'>
+            <CCol sm={6}>
+              <h4 id="ph-levels" className="card-title mb-0">
+                pH Levels
+              </h4>
+              <Line data={phData} options={phOptions} />
+            </CCol>
             <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
                 Temperature
@@ -356,7 +340,7 @@ const Dashboard = () => {
               {/* <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
                 <Line data={temperatureData} options={options5} />
               </div> */}
-              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px', marginLeft:'100px' }}>
+              <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px', marginLeft: '100px' }}>
                 <Thermometer
                   theme="light"
                   value={temperature}

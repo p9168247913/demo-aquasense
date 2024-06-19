@@ -10,7 +10,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,
 } from '@mui/material'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
 import Swal from 'sweetalert2'
@@ -69,14 +68,8 @@ const RemoteOperation = () => {
 
   const handlePumpSwitchChange = (event) => {
     const isChecked = event.target.checked
-    setPumpOn(isChecked)
+    const previousState = pumpOn
 
-    // Swal.fire({
-    //   title: 'Pump Switch',
-    //   text: isChecked ? 'The pump has been turned ON.' : 'The pump has been turned OFF.',
-    //   icon: 'info',
-    //   confirmButtonText: 'Do you really want to switch off the pump?',
-    // })
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: 'btn btn-success',
@@ -84,10 +77,11 @@ const RemoteOperation = () => {
       },
       buttonsStyling: false,
     })
+
     swalWithBootstrapButtons
       .fire({
         title: 'Are you sure?',
-        text: isChecked ? 'The pump has been turned ON.' : 'The pump has been turned OFF',
+        text: isChecked ? 'The pump will be turned ON.' : 'The pump will be turned OFF',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes!',
@@ -96,20 +90,19 @@ const RemoteOperation = () => {
       })
       .then((result) => {
         if (result.isConfirmed) {
+          setPumpOn(isChecked)
           swalWithBootstrapButtons.fire({
-            title: isChecked ? 'Pump on' : 'Pump Off',
-            text: 'Your file has been deleted.',
+            title: isChecked ? 'Pump is ON' : 'Pump is OFF',
+            text: 'The pump has been turned.',
             icon: 'success',
           })
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire({
             title: 'Cancelled',
-            text: 'Your imaginary file is safe :)',
+            text: 'The pump state remains unchanged.',
             icon: 'error',
           })
+          setPumpOn(previousState)
         }
       })
   }
@@ -145,7 +138,7 @@ const RemoteOperation = () => {
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Motor Control and Monitoring Panel
+        Pump Energy Monitoring
       </Typography>
       <Paper elevation={3} sx={{ p: 3 }}>
         <FormControlLabel
@@ -155,7 +148,7 @@ const RemoteOperation = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
           <LightbulbIcon sx={{ fontSize: 40, color: pumpOn ? 'yellow' : 'grey' }} />
           <Typography variant="h6" sx={{ ml: 2 }}>
-            {pumpOn ? '' : ''}
+            {pumpOn ? 'Pump is ON' : 'Pump is OFF'}
           </Typography>
         </Box>
         <Grid container spacing={2} sx={{ mt: 2 }}>
@@ -195,17 +188,16 @@ const RemoteOperation = () => {
             <Paper elevation={1} sx={{ p: 2 }}>
               <Typography variant="h6">SPP Status</Typography>
               <FormControl fullWidth>
-                {/* <InputLabel id="spp-status-label">SPP Status</InputLabel> */}
                 <Select
                   labelId="spp-status-label"
                   value={sppStatus}
                   label=""
                   onChange={handleSppStatusChange}
-                  style={{height: '15px'}}
+                  style={{ height: '40px' }} // adjusted height
                 >
-                  <MenuItem value="Ok">Reverse</MenuItem>
-                  <MenuItem value="Warning">Missing</MenuItem>
-                  <MenuItem value="Error">Asymmetry</MenuItem>
+                  <MenuItem value="Reverse">Reverse</MenuItem>
+                  <MenuItem value="Missing">Missing</MenuItem>
+                  <MenuItem value="Asymmetry">Asymmetry</MenuItem>
                 </Select>
               </FormControl>
             </Paper>

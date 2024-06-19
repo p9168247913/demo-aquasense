@@ -45,6 +45,7 @@ const modalStyle = {
   p: 4,
 };
 
+
 const Profile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,14 +72,16 @@ const Profile = () => {
     event.preventDefault();
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   const handleSaveChanges = () => {
     // Handle save changes logic here
     console.log(profile);
     handleClose();
   };
+
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+
+
 
   return (
     <ProfileContainer>
@@ -296,7 +299,7 @@ const Profile = () => {
             fullWidth
             variant="contained"
             color="primary"
-            sx={{ mt: 3 }} // Ensure 'sx' prop is used correctly
+            sx={{ mt: 3 }}
             onClick={handleSaveChanges}
           >
             Save Changes
@@ -304,7 +307,7 @@ const Profile = () => {
         </Box>
       </Modal>
     </ProfileContainer>
-  );
-};
+  )
+}
 
 export default Profile;

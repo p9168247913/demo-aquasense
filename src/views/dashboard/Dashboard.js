@@ -13,6 +13,9 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 import { Line, Bar, PolarArea, Radar, Doughnut } from 'react-chartjs-2';
 import Thermometer from 'react-thermometer-component';
+import LiquidFillGauge from 'react-liquid-gauge';
+import { interpolateRgb } from 'd3-interpolate';
+import { color } from 'd3-color';
 
 const Dashboard = () => {
 
@@ -258,6 +261,34 @@ const Dashboard = () => {
 
   const temperature = 72
 
+  const [waterLevel, setWaterLevel] = useState(50); // Example initial water level
+  const startColor = '#6DA398'; // green
+  const endColor = '#FF6262'; // red
+  const radius = 100;
+  const interpolate = interpolateRgb(startColor, endColor);
+  const fillColor = interpolate(waterLevel / 100);
+  const gradientStops = [
+    {
+      key: '0%',
+      stopColor: color(fillColor).darker(0.5).toString(),
+      stopOpacity: 1,
+      offset: '0%',
+    },
+    {
+      key: '50%',
+      stopColor: fillColor,
+      stopOpacity: 0.75,
+      offset: '50%',
+    },
+    {
+      key: '100%',
+      stopColor: color(fillColor).brighter(0.5).toString(),
+      stopOpacity: 0.5,
+      offset: '100%',
+    },
+  ];
+
+
   return (
     <>
       <CCard className="mb-4">
@@ -287,7 +318,7 @@ const Dashboard = () => {
           <CRow className='mt-4'>
             <CCol sm={6}>
               <h4 id="traffic" className="card-title mb-0">
-                Pressure
+                Inline Pressure
               </h4>
               <div className="small text-body-secondary">January - July 2024</div>
               <div className="chart-wrapper" style={{ height: '300px', marginTop: '40px' }}>
@@ -354,6 +385,81 @@ const Dashboard = () => {
               </div>
               <div className="current-temperature ml-3">{temperature} °C</div>
             </CCol>
+          </CRow>
+          <CRow className='mt-4'>
+          <CCol sm={6} lg={3}>
+        <CCard className="text-white bg-primary">
+          <CCardBody className="pb-0">
+            <div className="text-value">Water Level</div>
+            <div>Current Water Level: {waterLevel}%</div>
+          </CCardBody>
+          <LiquidFillGauge
+            style={{ margin: '0 auto' }}
+            width={radius * 2}
+            height={radius * 2}
+            value={waterLevel}
+            percent="true"
+            textSize={1}
+            textOffsetX={0}
+            textOffsetY={0}
+            textRenderer={(props) => {
+              const value = Math.round(props.value);
+              const radius = Math.min(props.height / 2, props.width / 2);
+              const textPixels = (props.textSize * radius) / 2;
+              const valueStyle = {
+                fontSize: textPixels,
+              };
+              const percentStyle = {
+                fontSize: textPixels * 0.6,
+              };
+              return (
+                <tspan>
+                  <tspan className="value" style={valueStyle}>
+                    {value}
+                  </tspan>
+                  <tspan style={percentStyle}>%</tspan>
+                </tspan>
+              );
+            }}
+            riseAnimation
+            waveAnimation
+            waveFrequency={2}
+            waveAmplitude={1}
+            gradient
+            gradientStops={gradientStops}
+            circleStyle={{
+              fill: fillColor,
+            }}
+            waveStyle={{
+              fill: fillColor,
+            }}
+            textStyle={{
+              fill: color('#444').toString(),
+              fontFamily: 'Arial',
+            }}
+            waveTextStyle={{
+              fill: color('#fff').toString(),
+              fontFamily: 'Arial',
+            }}
+          />
+          <div className="mb-3 d-flex justify-content-center">
+            <CButtonGroup>
+              <CButton
+                color="outline-secondary"
+                onClick={() => setWaterLevel((prevLevel) => Math.max(prevLevel - 10, 0))}
+              >
+                Decrease
+              </CButton>
+              <CButton
+                color="outline-secondary"
+                onClick={() => setWaterLevel((prevLevel) => Math.min(prevLevel + 10, 100))}
+              >
+                Increase
+              </CButton>
+            </CButtonGroup>
+          </div>
+        </CCard>
+      </CCol>
           </CRow>
         </CCardBody>
       </CCard>

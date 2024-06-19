@@ -145,7 +145,7 @@ const RemoteOperation = () => {
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Motor Control and Monitoring Panel
+        Pump Energy Monitoring
       </Typography>
       <Paper elevation={3} sx={{ p: 3 }}>
         <FormControlLabel

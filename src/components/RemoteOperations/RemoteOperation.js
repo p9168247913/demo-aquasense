@@ -1,7 +1,19 @@
 import React, { useState } from 'react'
 import { styled } from '@mui/material/styles'
-import { Box, Typography, Paper, FormControlLabel, Switch, Grid } from '@mui/material'
+import {
+  Box,
+  Typography,
+  Paper,
+  FormControlLabel,
+  Switch,
+  Grid,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material'
 import LightbulbIcon from '@mui/icons-material/Lightbulb'
+import Swal from 'sweetalert2'
 
 const IOSSwitch = styled((props) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
@@ -51,11 +63,59 @@ const IOSSwitch = styled((props) => (
   },
 }))
 
-const MotorControl = () => {
+const RemoteOperation = () => {
   const [pumpOn, setPumpOn] = useState(true)
+  const [sppStatus, setSppStatus] = useState('Ok')
 
   const handlePumpSwitchChange = (event) => {
-    setPumpOn(event.target.checked)
+    const isChecked = event.target.checked
+    setPumpOn(isChecked)
+
+    // Swal.fire({
+    //   title: 'Pump Switch',
+    //   text: isChecked ? 'The pump has been turned ON.' : 'The pump has been turned OFF.',
+    //   icon: 'info',
+    //   confirmButtonText: 'Do you really want to switch off the pump?',
+    // })
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger',
+      },
+      buttonsStyling: false,
+    })
+    swalWithBootstrapButtons
+      .fire({
+        title: 'Are you sure?',
+        text: isChecked ? 'The pump has been turned ON.' : 'The pump has been turned OFF',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes!',
+        cancelButtonText: 'No, cancel!',
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          swalWithBootstrapButtons.fire({
+            title: isChecked ? 'Pump on' : 'Pump Off',
+            text: 'Your file has been deleted.',
+            icon: 'success',
+          })
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalWithBootstrapButtons.fire({
+            title: 'Cancelled',
+            text: 'Your imaginary file is safe :)',
+            icon: 'error',
+          })
+        }
+      })
+  }
+
+  const handleSppStatusChange = (event) => {
+    setSppStatus(event.target.value)
   }
 
   const sensorData = {
@@ -63,7 +123,7 @@ const MotorControl = () => {
     tankHigh: true,
     dolTrip: false,
     pumpStatus: pumpOn ? 'Running' : 'Stopped',
-    sppStatus: 'Ok',
+    sppStatus: sppStatus,
     voltage: '220V',
     current: '10A',
     watts: '2200W',
@@ -109,7 +169,7 @@ const MotorControl = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">Tank High</Typography>
+              <Typography variant="h6">Tank Overflow</Typography>
               <Typography variant="body1" color={sensorData.tankHigh ? 'error' : 'textSecondary'}>
                 {sensorData.tankHigh ? 'Alert' : 'OK'}
               </Typography>
@@ -134,9 +194,20 @@ const MotorControl = () => {
           <Grid item xs={12} sm={6} md={4}>
             <Paper elevation={1} sx={{ p: 2 }}>
               <Typography variant="h6">SPP Status</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.sppStatus) }}>
-                {sensorData.sppStatus}
-              </Typography>
+              <FormControl fullWidth>
+                {/* <InputLabel id="spp-status-label">SPP Status</InputLabel> */}
+                <Select
+                  labelId="spp-status-label"
+                  value={sppStatus}
+                  label=""
+                  onChange={handleSppStatusChange}
+                  style={{height: '15px'}}
+                >
+                  <MenuItem value="Ok">Reverse</MenuItem>
+                  <MenuItem value="Warning">Missing</MenuItem>
+                  <MenuItem value="Error">Asymmetry</MenuItem>
+                </Select>
+              </FormControl>
             </Paper>
           </Grid>
         </Grid>
@@ -170,4 +241,4 @@ const MotorControl = () => {
   )
 }
 
-export default MotorControl
+export default RemoteOperation

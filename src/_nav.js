@@ -36,8 +36,8 @@ const _nav = [
   },
   {
     component: CNavItem,
-    name: 'Motor Control',
-    to: '/motor-control',
+    name: 'Remote Operations',
+    to: '/remote-operations',
     icon: <CIcon icon={cilCalculator} customClassName="nav-icon" />,
   },
   {

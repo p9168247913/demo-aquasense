@@ -1,6 +1,6 @@
 import React from 'react'
 import Analytics from './components/Analytics/Analytics'
-import MotorControl from './components/MotorControl/MotorControl'
+import RemoteOperations from './components/RemoteOperations/RemoteOperation'
 import Profile from './components/Profile/Profile'
 import Dashboard1 from './views/dashboard/Dashboard1'
 
@@ -60,7 +60,7 @@ const routes = [
   { path: '/dashboard', name: 'Dashboard', element: Dashboard },
   // { path: '/dashboard', name: 'Dashboard1', element: Dashboard1 },
   { path: '/analytics', name: 'Analytics', element: Analytics },
-  { path: '/motor-control', name: 'Motor Control', element: MotorControl },
+  { path: '/remote-operations', name: 'Remote Operations', element: RemoteOperations },
   { path: '/profile', name: 'Profile', element: Profile },
   
   { path: '/theme', name: 'Theme', element: Colors, exact: true },

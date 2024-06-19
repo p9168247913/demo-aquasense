@@ -48,7 +48,7 @@ const Analytics = () => {
         row.sno,
         row.timestamp,
         row.battery,
-        row.waterLevel,
+        // row.waterLevel,
         row.temperature,
         row.conductivity,
       ]),
@@ -76,7 +76,7 @@ const Analytics = () => {
     <>
       <Box display="flex" justifyContent="flex-end" p={2}>
         <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-          <InputLabel id="dropdown-label">Select Device</InputLabel>
+          <InputLabel id="dropdown-label">Select Site</InputLabel>
           <Select
             labelId="dropdown-label"
             id="dropdown"
@@ -87,9 +87,11 @@ const Analytics = () => {
             <MenuItem value="">
               {/* <em>None</em> */}
             </MenuItem>
-            <MenuItem value={10}>Temperature</MenuItem>
-            <MenuItem value={20}>PH Level</MenuItem>
-            <MenuItem value={30}>Chlorine</MenuItem>
+            <MenuItem value={10}>Site1</MenuItem>
+            <MenuItem value={20}>Site2</MenuItem>
+            <MenuItem value={30}>Site3</MenuItem>
+            <MenuItem value={40}>Site4</MenuItem>
+            <MenuItem value={50}>Site5</MenuItem>
           </Select>
         </FormControl>
         <IconButton onClick={handleDownload} color="primary" aria-label="download data">
@@ -103,7 +105,7 @@ const Analytics = () => {
               <TableCell>S.NO</TableCell>
               <TableCell align="right">Timestamp</TableCell>
               <TableCell align="right">Battery</TableCell>
-              <TableCell align="right">Water-Level</TableCell>
+              {/* <TableCell align="right">Water-Level</TableCell> */}
               <TableCell align="right">Temperature</TableCell>
               <TableCell align="right">Conductivity</TableCell>
             </TableRow>
@@ -116,7 +118,7 @@ const Analytics = () => {
                 </TableCell>
                 <TableCell align="right">{row.timestamp}</TableCell>
                 <TableCell align="right">{row.battery}</TableCell>
-                <TableCell align="right">{row.waterLevel}</TableCell>
+                {/* <TableCell align="right">{row.waterLevel}</TableCell> */}
                 <TableCell align="right">{row.temperature}</TableCell>
                 <TableCell align="right">{row.conductivity}</TableCell>
               </TableRow>

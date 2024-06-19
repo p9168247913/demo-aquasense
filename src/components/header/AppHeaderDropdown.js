@@ -22,7 +22,7 @@ import {
 } from '@coreui/icons'
 import CIcon from '@coreui/icons-react'
 
-import avatar8 from './../../assets/images/avatars/8.jpg'
+import avatar8 from './../../assets/images/avatars/blank-profile.webp'
 
 const AppHeaderDropdown = () => {
   return (
@@ -61,7 +61,7 @@ const AppHeaderDropdown = () => {
           </CBadge>
         </CDropdownItem>
         <CDropdownHeader className="bg-body-secondary fw-semibold my-2">Settings</CDropdownHeader>
-        <CDropdownItem href="#">
+        <CDropdownItem href="#/profile">
           <CIcon icon={cilUser} className="me-2" />
           Profile
         </CDropdownItem>

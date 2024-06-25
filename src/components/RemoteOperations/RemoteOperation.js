@@ -29,31 +29,41 @@ const RemoteOperation = () => {
     const isChecked = !pumpOn
     const previousState = pumpOn
 
-    Swal.fire({
-      title: 'Are you sure?',
-      text: isChecked ? 'The pump will be turned ON.' : 'The pump will be turned OFF',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setPumpOn(isChecked)
-        Swal.fire({
-          title: isChecked ? 'Pump is ON' : 'Pump is OFF',
-          text: 'The pump has been turned ' + (isChecked ? 'ON' : 'OFF') + '.',
-          icon: 'success',
-        })
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: 'Cancelled',
-          text: 'The pump state remains unchanged.',
-          icon: 'error',
-        })
-        setPumpOn(previousState)
-      }
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: 'btn btn-success',
+        cancelButton: 'btn btn-danger',
+      },
+      buttonsStyling: false,
     })
+
+    swalWithBootstrapButtons
+      .fire({
+        title: 'Are you sure?',
+        text: isChecked ? 'The pump will be turned ON.' : 'The pump will be turned OFF',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes!',
+        cancelButtonText: 'No',
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          setPumpOn(isChecked)
+          swalWithBootstrapButtons.fire({
+            title: isChecked ? 'Pump is ON' : 'Pump is OFF',
+            text: 'The pump has been turned.',
+            icon: 'success',
+          })
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire({
+            title: 'Cancelled',
+            text: 'The pump state remains unchanged.',
+            icon: 'error',
+          })
+          setPumpOn(previousState)
+        }
+      })
   }
 
   const columns = [

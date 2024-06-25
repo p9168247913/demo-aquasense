@@ -85,7 +85,7 @@ const RemoteOperation = () => {
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes!',
-        cancelButtonText: 'No, cancel!',
+        cancelButtonText: 'No',
         reverseButtons: true,
       })
       .then((result) => {

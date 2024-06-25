@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
@@ -14,14 +14,292 @@ import { Chart, registerables } from 'chart.js'
 Chart.register(...registerables)
 import { Line, Bar, PolarArea } from 'react-chartjs-2'
 import { useToast } from '@chakra-ui/react'
+import baseUrl from "../../API/baseUrl"
+import axios from "axios";
+import { format } from 'date-fns'
 
 const Analytics = () => {
   const [selectedOption, setSelectedOption] = useState('')
-  const [showTDS, setShowTDS] = useState(false)
+  const [showTDS, setShowTDS] = useState(false);
+  const [apiData, setApiData] = useState([])
+  const [chlorineData, setChlorineData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [tssData, setTssData] = useState({
+    labels: [],
+    datasets: [],
+  })
+  const [phData, setphData] = useState({
+    labels: [],
+    datasets: [],
+  })
+  const [ecData, setecData] = useState({
+    labels: [],
+    datasets: [],
+  })
+  const [displayData, setDisplayData] = useState('ec');
+  const [pressureData, setPressureData] = useState({
+    labels: [],
+    datasets: [],
+  })
+  const [temperatureData, setTemperatureData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [flowRateData, setFlowRateData] = useState({
+    labels: [],
+    datasets: [],
+  });
+  const [totalizerData, setTotalizerData] = useState({
+    labels: [],
+    datasets: [],
+  });
+
+  const getData = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/data`)
+      if (response.data) {
+        const limitedData = response.data.slice(0, 5);
+        setApiData(response.data)
+        console.log("response", response.data);
+        processChlorineData(limitedData)
+        processTssData(limitedData)
+        processphData(limitedData)
+        processECData(limitedData)
+        processPresureData(limitedData)
+        processTemperatureData(limitedData);
+        processFlowRateData(limitedData)
+        processTotalizerData(limitedData)
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const processChlorineData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const residualChlorine = data.map(item => item.residualChlorine === "" ? null : item.residualChlorine)
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Residual Chlorine (mg/l)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          data: residualChlorine,
+        },
+      ],
+    }
+    setChlorineData(chartData)
+  }
+  const processTssData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const tss = data.map(item => item.tss === "" ? null : item.tss)
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'TSS Levels (mg/l)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          data: tss,
+        },
+      ],
+    }
+    setTssData(chartData)
+  }
+  const processphData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const ph = data.map(item => item.ph === "" ? null : item.ph)
+
+    const backgroundColors = ph.map(value => {
+      if (value < 7) {
+        return 'rgba(255, 99, 132, 0.5)'; // Red for acidic
+      } else if (value == 7) {
+        return 'rgba(255, 206, 86, 0.5)'; // Yellow for neutral
+      } else {
+        return 'rgba(75, 192, 192, 0.5)'; // Blue for basic
+      }
+    })
+
+    const borderColors = ph.map(value => {
+      if (value < 7) {
+        return 'rgba(255, 99, 132, 1)'; // Red for acidic
+      } else if (value == 7) {
+        return 'rgba(255, 206, 86, 1)'; // Yellow for neutral
+      } else {
+        return 'rgba(75, 192, 192, 1)'; // Blue for basic
+      }
+    })
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'pH',
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 2,
+          data: ph,
+        },
+      ],
+    }
+    setphData(chartData)
+  }
+  const processECData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const conductivity = data.map(item => item.conductivity === "" ? null : item.conductivity)
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Electrical Conductivity (mS/cm)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          data: conductivity,
+        },
+      ],
+    }
+    setecData(chartData)
+  }
+  const processPresureData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const pressure = data.map(item => item.pressure === "" ? null : item.pressure)
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Pressure (Bar)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          data: pressure,
+        },
+      ],
+    }
+    setPressureData(chartData)
+  }
+  const processTemperatureData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
+    const temperature = data.map(item => item.temperature === "" ? null : item.temperature);
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Water Temperature (°C)',
+          backgroundColor: 'rgba(153, 102, 255, 0.2)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 2,
+          data: temperature,
+        },
+      ],
+    };
+    setTemperatureData(chartData);
+  };
+  const processFlowRateData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
+    const flowRate = data.map(item => item.flowRate === "" ? null : item.flowRate);
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Flow Rate (L/s)',
+          backgroundColor: 'rgba(255, 159, 64, 0.2)',
+          borderColor: 'rgba(255, 159, 64, 1)',
+          borderWidth: 2,
+          data: flowRate,
+        },
+      ],
+    };
+    setFlowRateData(chartData);
+  };
+  const processTotalizerData = (data) => {
+    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
+    const totalizedVolume = data.map(item => item.totalizedVolume === "" ? null : item.totalizedVolume);
+
+    const chartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Totalized Volume (m³)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2,
+          data: totalizedVolume,
+        },
+      ],
+    };
+    setTotalizerData(chartData);
+  };
+
+  useEffect(() => {
+    getData();
+  }, [])
 
   const handleChange = (event) => {
     setSelectedOption(event.target.value)
   }
+
+  const handleButtonClick = (option) => {
+    setDisplayData(option);
+  };
+
+  const convertToTDS = (ecData) => {
+    const conversionFactor = 0.67;
+    return ecData.map(value => value * conversionFactor);
+  };
+
+  const ecOrTdsData = () => {
+    if (displayData === 'tds') {
+      const labels = ecData.labels;
+      const tds = convertToTDS(ecData.datasets[0].data);
+
+      return {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total Dissolved Solids (mg/l)',
+            backgroundColor: 'rgba(255, 159, 64, 0.2)',
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 2,
+            data: tds,
+          },
+        ],
+      };
+    }
+    return ecData;
+  };
+
+  const ECoptions = {
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Time',
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: displayData === 'tds' ? 'TDS (mg/l)' : 'Electrical Conductivity (mS/cm)',
+        },
+        suggestedMin: 0,
+        suggestedMax: Infinity,
+        beginAtZero: true,
+      },
+    },
+  };
 
   const handleDownload = () => {
     const csvContent = [
@@ -57,26 +335,14 @@ const Analytics = () => {
     link.click()
   }
 
-  const toast = useToast()
-  const chlorineData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-    datasets: [
-      {
-        label: 'Chlorine (mg/l)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2,
-        data: [1.2, 1.4, 1.1, 1.3, 1.0, 1.5, 1.2],
-      },
-    ],
-  }
+  const toast = useToast();
 
   const options = {
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Month',
+          text: 'Time',
         },
       },
       y: {
@@ -85,22 +351,10 @@ const Analytics = () => {
           text: 'Chlorine (mg/l)',
         },
         suggestedMin: 0,
-        suggestedMax: 2,
+        suggestedMax: Infinity,
+        beginAtZero: true,
       },
     },
-  }
-
-  const data = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-    datasets: [
-      {
-        label: 'TSS (mg/l)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 2,
-        data: [15, 18, 17, 16, 19, 20],
-      },
-    ],
   }
 
   const options1 = {
@@ -108,7 +362,7 @@ const Analytics = () => {
       x: {
         title: {
           display: true,
-          text: 'Month',
+          text: 'Time',
         },
       },
       y: {
@@ -117,62 +371,29 @@ const Analytics = () => {
           text: 'TSS (mg/l)',
         },
         suggestedMin: 0,
-        suggestedMax: 25,
+        suggestedMax: Infinity,
+        beginAtZero: true,
       },
     },
   }
 
-  const phValue = 7
-  let phColor
-
-  if (phValue < 7) {
-    phColor = 'rgba(255, 99, 132, 0.5)'
-  } else if (phValue === 7) {
-    phColor = 'rgba(255, 206, 86, 0.5)'
-  } else {
-    phColor = 'rgba(75, 192, 192, 0.5)'
-  }
-
-  const phData = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
-    datasets: [
-      {
-        label: 'pH Level',
-        data: [4.2, 7, 12, 6, 8], // Example pH values corresponding to timestamps
-        fill: false,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        pointBackgroundColor: (context) => {
-          const phValue = context.dataset.data[context.dataIndex]
-          return phValue < 7
-            ? 'rgba(255, 99, 132, 1)'
-            : phValue === 7
-              ? 'rgba(255, 206, 86, 1)'
-              : 'rgba(75, 192, 192, 1)'
-        },
-        pointBorderColor: 'rgba(75, 192, 192, 1)',
-      },
-    ],
-  }
-
   const phOptions = {
-    indexAxis: 'y',
+    indexAxis: 'x',
     scales: {
       x: {
         title: {
           display: true,
-          text: 'pH Level',
+          text: 'Time',
         },
-        beginAtZero: true,
-        max: 14,
+        stacked: true,
       },
       y: {
         title: {
           display: true,
-          text: 'Category',
+          text: 'ph Level',
         },
-        stacked: true,
+        beginAtZero: true,
+        max: 14,
       },
     },
     plugins: {
@@ -182,106 +403,32 @@ const Analytics = () => {
     },
   }
 
-  const [selectedOptions, setSelectedOptions] = useState('electricalConductivity')
-
-  const handleChanges = (event) => {
-    setSelectedOptions(event.target.value)
-  }
-
-  const handleButtonClick = (option) => {
-    setSelectedOptions(option)
-  }
-
-  const electricalConductivityData = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
-    datasets: [
-      {
-        label: selectedOption === 'tds' ? 'TDS (ppm)' : 'EC (uS/cm)',
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
-        data: selectedOption === 'tds' ? [150, 160, 140, 165, 155] : [75, 80, 70, 85, 78],
-      },
-    ],
-  }
-
-  const options3 = {
-    scales: {
-      r: {
-        suggestedMin: selectedOption === 'tds' ? 100 : 60,
-        suggestedMax: selectedOption === 'tds' ? 200 : 90,
-      },
-    },
-  }
-
-  const data4 = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM'],
-    datasets: [
-      {
-        label: 'Pressure (Bar)',
-        fill: false,
-        lineTension: 0.1,
-        backgroundColor: 'rgba(75,192,192,0.4)',
-        borderColor: 'rgba(75,192,192,1)',
-        borderCapStyle: 'butt',
-        borderDash: [],
-        borderDashOffset: 0.0,
-        borderJoinStyle: 'miter',
-        pointBorderColor: 'rgba(75,192,192,1)',
-        pointBackgroundColor: '#fff',
-        pointBorderWidth: 1,
-        pointHoverRadius: 5,
-        pointHoverBackgroundColor: 'rgba(75,192,192,1)',
-        pointHoverBorderColor: 'rgba(220,220,220,1)',
-        pointHoverBorderWidth: 2,
-        pointRadius: 1,
-        pointHitRadius: 10,
-        data: [1.5, 1.7, 1.4, 1.6, 1.8], // Replace with your Pressure data
-      },
-    ],
-  }
-
-  const options4 = {
+  const pressureOptions = {
     scales: {
       x: {
-        display: true,
         title: {
           display: true,
-          text: 'Monitoring Sites',
+          text: 'Time',
         },
       },
       y: {
-        display: true,
         title: {
           display: true,
           text: 'Pressure (Bar)',
         },
-        suggestedMin: 1,
-        suggestedMax: 2,
+        suggestedMin: 0,
+        suggestedMax: Infinity,
+        beginAtZero: true,
       },
     },
-  }
+  };
 
-  const temperatureData = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM', '03:00 PM', '06:00 PM'],
-    datasets: [
-      {
-        label: 'Water Temperature (°C)',
-        fill: true,
-        backgroundColor: 'rgba(153, 102, 255, 0.2)',
-        borderColor: 'rgba(153, 102, 255, 1)',
-        borderWidth: 1,
-        data: [22, 24, 23, 25, 24, 26, 27],
-      },
-    ],
-  }
-
-  const options5 = {
+  const temperatureOptions = {
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Time of Day',
+          text: 'Time',
         },
       },
       y: {
@@ -289,31 +436,18 @@ const Analytics = () => {
           display: true,
           text: 'Temperature (°C)',
         },
-        suggestedMin: 20,
-        suggestedMax: 30,
+        suggestedMin: 0,
+        suggestedMax: 40,
       },
     },
-  }
+  };
 
-  const flowRateData = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM', '03:00 PM', '06:00 PM'],
-    datasets: [
-      {
-        label: 'Flow Rate (L/s)',
-        backgroundColor: 'rgba(255, 159, 64, 0.2)',
-        borderColor: 'rgba(255, 159, 64, 1)',
-        borderWidth: 1,
-        data: [5, 6, 5.5, 6.2, 5.8, 6.5, 7],
-      },
-    ],
-  }
-
-  const options6 = {
+  const flowRateOptions = {
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Time of Day',
+          text: 'Time',
         },
       },
       y: {
@@ -321,31 +455,19 @@ const Analytics = () => {
           display: true,
           text: 'Flow Rate (L/s)',
         },
-        suggestedMin: 4,
-        suggestedMax: 8,
+        suggestedMin: 0,
+        suggestedMax: 20,
+        beginAtZero: true,
       },
     },
-  }
+  };
 
-  const totalizerData = {
-    labels: ['12:00 AM', '03:00 AM', '06:00 AM', '09:00 AM', '12:00 PM', '03:00 PM', '06:00 PM'],
-    datasets: [
-      {
-        label: 'Totalized Volume (m³)',
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-        data: [100, 150, 200, 250, 300, 350, 400],
-      },
-    ],
-  }
-
-  const options7 = {
+  const totalizerOptions = {
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Time of Day',
+          text: 'Time',
         },
       },
       y: {
@@ -355,9 +477,10 @@ const Analytics = () => {
         },
         suggestedMin: 0,
         suggestedMax: 500,
+        beginAtZero: true,
       },
     },
-  }
+  };
 
   return (
     <>
@@ -418,7 +541,7 @@ const Analytics = () => {
           <CCard className="mb-4">
             <CCardBody>
               <h4>TSS Levels</h4>
-              <Bar data={data} options={options1} />
+              <Bar data={tssData} options={options1} />
             </CCardBody>
           </CCard>
         </CCol>
@@ -429,32 +552,34 @@ const Analytics = () => {
           <CCard className="mb-4">
             <CCardBody>
               <h4>pH Levels</h4>
-              <Bar data={phData} options={phOptions} />
+              <Line data={phData} options={phOptions} />
             </CCardBody>
           </CCard>
         </CCol>
         <CCol xs={12} md={6}>
           <CCard className="mb-4">
-            <CCardBody>
-              <h4>Electrical Conductivity / TDS</h4>
+            <CCardBody >
+              <div style={{ display: "flex", gap: "20px" }}>
+                <h4>Electrical Conductivity / TDS</h4>
 
-              <div className="mb-3">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleButtonClick('electricalConductivity')}
-                >
-                  Electrical Conductivity
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => handleButtonClick('tds')}
-                >
-                  TDS
-                </Button>
+                <div className="mb-3">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleButtonClick('electricalConductivity')}
+                  >
+                    EC
+                  </Button>&nbsp;
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => handleButtonClick('tds')}
+                  >
+                    TDS
+                  </Button>
+                </div>
               </div>
-              <PolarArea data={electricalConductivityData} options={options3} />
+              <Line data={ecOrTdsData()} options={ECoptions} />
             </CCardBody>
           </CCard>
         </CCol>
@@ -465,7 +590,7 @@ const Analytics = () => {
           <CCard className="mb-4">
             <CCardBody>
               <h4>Pressure Levels</h4>
-              <Line data={data4} options={options4} />
+              <Line data={pressureData} options={pressureOptions} />
             </CCardBody>
           </CCard>
         </CCol>
@@ -473,7 +598,7 @@ const Analytics = () => {
           <CCard className="mb-4">
             <CCardBody>
               <h4>Water Temperature</h4>
-              <Bar data={temperatureData} options={options5} />
+              <Line data={temperatureData} options={temperatureOptions} />
             </CCardBody>
           </CCard>
         </CCol>
@@ -484,7 +609,7 @@ const Analytics = () => {
           <CCard className="mb-4">
             <CCardBody>
               <h4>Flow Rate</h4>
-              <Line data={flowRateData} options={options6} />
+              <Line data={flowRateData} options={flowRateOptions} />
             </CCardBody>
           </CCard>
         </CCol>
@@ -492,7 +617,7 @@ const Analytics = () => {
           <CCard className="mb-4 ">
             <CCardBody>
               <h4>Totalized Volume</h4>
-              <Bar data={totalizerData} options={options7} />
+              <Bar data={totalizerData} options={totalizerOptions} />
             </CCardBody>
           </CCard>
         </CCol>

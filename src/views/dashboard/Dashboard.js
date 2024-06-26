@@ -16,7 +16,7 @@ const Dashboard = () => {
     sppStatus: 'ok',
     voltage: '212V',
     current: '0A',
-    watts: '0W',
+    watts: '227W',
   }
 
   const getStatusColor = (status) => {
@@ -40,39 +40,39 @@ const Dashboard = () => {
     { title: 'Temperature', value: '31', unit: '°C', range: '0 - 100 °C' },
     { title: 'TSS', value: '0.8', unit: 'mg/L', range: '0 - 2000 mg/L' },
     { title: 'Pressure', value: '7', unit: 'bar', range: '0 - 10 bar' },
-    { title: 'Flow Rate', value: '530', unit: 'L/hr', range: '0 - 100 m³/hr' },
+    { title: 'Flow Rate', value: '530', unit: 'm3/hr', range: '0 - 100 m³/hr' },
     { title: 'Totalizer', value: '5000', unit: 'm³', range: '0 - 10000 m³' },
   ]
 
   const SensorCard = ({ title, value, unit, range }) => {
-    const cardColors = {
-      Conductivity: '#FFCCCB',
-      TDS: '#D3D3D3',
-      pH: '#FFD700',
-      'Residual Chlorine': '#ADD8E6',
-      Temperature: '#90EE90',
-      TSS: '#FFB6C1',
-      Pressure: '#F08080',
-      'Flow Rate': '#E0FFFF',
-      Totalizer: '#E6E6FA',
+    const cardGradients = {
+      Conductivity: 'linear-gradient(to left, #24c6dc, #514a9d)',
+      TDS: 'linear-gradient(to left, #373b44, #4286f4)',
+      pH: 'linear-gradient(to left, #fe8c00, #f83600)', // Updated gradient for pH
+      'Residual Chlorine': 'linear-gradient(to left, #52c234, #061700)',
+      Temperature: 'linear-gradient(to left, #f12711, #f5af19)',
+      TSS: 'linear-gradient(to left, #667db6, #0082c8, #0082c8, #667db6)',
+      Pressure: 'linear-gradient(to left, #000428, #004e92)',
+      'Flow Rate': 'linear-gradient(to left, #5c258d, #4389a2)',
+      Totalizer: 'linear-gradient(to left, #360033, #0b8793)',
     }
 
     const currentDate = new Date()
     const dateString = currentDate.toLocaleString()
 
     return (
-      <Card sx={{ minWidth: 275, margin: 2, backgroundColor: cardColors[title] }}>
+      <Card sx={{ minWidth: 275, margin: 2, background: cardGradients[title] }}>
         <CardContent>
-          <Typography variant="h5" component="div">
+          <Typography variant="h5" component="div" sx={{ color: 'white' }}>
             {title}
           </Typography>
-          <Typography variant="h4" color="text.secondary">
+          <Typography variant="h4" sx={{ color: 'white' }}>
             {value} {unit}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'white' }}>
             Range: {range}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{ color: 'white' }}>
             Last Updated: {dateString}
           </Typography>
         </CardContent>

@@ -7,9 +7,7 @@ import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import DownloadIcon from '@mui/icons-material/Download'
-
 import { CButton, CButtonGroup, CCard, CCardBody, CCol, CRow } from '@coreui/react'
-
 import { Chart, registerables } from 'chart.js'
 Chart.register(...registerables)
 import { Line, Bar, PolarArea } from 'react-chartjs-2'
@@ -17,6 +15,8 @@ import { useToast } from '@chakra-ui/react'
 import baseUrl from "../../API/baseUrl"
 import axios from "axios";
 import { format } from 'date-fns'
+import { saveAs } from 'file-saver';
+import * as XLSX from 'xlsx';
 
 const Analytics = () => {
   const [selectedOption, setSelectedOption] = useState('')
@@ -60,22 +60,54 @@ const Analytics = () => {
     try {
       const response = await axios.get(`${baseUrl}/data`)
       if (response.data) {
-        const limitedData = response.data.slice(0, 5);
+        const limitedData = response.data.slice(0, 10);
+        const sortedData = limitedData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
         setApiData(response.data)
         console.log("response", response.data);
-        processChlorineData(limitedData)
-        processTssData(limitedData)
-        processphData(limitedData)
-        processECData(limitedData)
-        processPresureData(limitedData)
-        processTemperatureData(limitedData);
-        processFlowRateData(limitedData)
-        processTotalizerData(limitedData)
+        processChlorineData(sortedData)
+        processTssData(sortedData)
+        processphData(sortedData)
+        processECData(sortedData)
+        processPresureData(sortedData)
+        processTemperatureData(sortedData);
+        processFlowRateData(sortedData)
+        processTotalizerData(sortedData)
       }
 
     } catch (error) {
       console.log(error);
     }
+  }
+
+  const handleDownload = () => {
+    const filteredData = apiData.map(({ _id, createdAt, updatedAt, __v, ...rest }) => rest);
+    const dataWithHeadings = [
+      {
+        deviceId: 'Device ID',
+        dateTime: 'Date Time',
+        phoneNo: 'Phone Number',
+        batteryPercentage: 'Battery Percentage',
+        conductivity: 'Conductivity',
+        tds: 'TDS',
+        ph: 'pH',
+        residualChlorine: 'Residual Chlorine',
+        temperature: 'Temperature',
+        tss: 'TSS',
+        pressure: 'Pressure',
+        flowRate: 'Flow Rate',
+        totalizer: 'Totalizer',
+      },
+      ...filteredData,
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(dataWithHeadings, { skipHeader: true });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'IoT Data');
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(blob, 'iot_data.xlsx');
   }
 
   const processChlorineData = (data) => {
@@ -300,40 +332,6 @@ const Analytics = () => {
       },
     },
   };
-
-  const handleDownload = () => {
-    const csvContent = [
-      ['Chart Type', 'Labels', 'Data'],
-      ['Chlorine Levels', chlorineData.labels.join(','), chlorineData.datasets[0].data.join(',')],
-      ['TSS Levels', data.labels.join(','), data.datasets[0].data.join(',')],
-      ['pH Levels', phData.labels.join(','), phData.datasets[0].data.join(',')],
-      [
-        showTDS ? 'TDS' : 'Electrical Conductivity',
-        electricalConductivityData.labels.join(','),
-        electricalConductivityData.datasets[0].data.join(','),
-      ],
-      ['Pressure Levels', data4.labels.join(','), data4.datasets[0].data.join(',')],
-      [
-        'Water Temperature',
-        temperatureData.labels.join(','),
-        temperatureData.datasets[0].data.join(','),
-      ],
-      ['Flow Rate', flowRateData.labels.join(','), flowRateData.datasets[0].data.join(',')],
-      [
-        'Totalized Volume',
-        totalizerData.labels.join(','),
-        totalizerData.datasets[0].data.join(','),
-      ],
-    ]
-      .map((e) => e.join(','))
-      .join('\n')
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = 'analytics_data.csv'
-    link.click()
-  }
 
   const toast = useToast();
 

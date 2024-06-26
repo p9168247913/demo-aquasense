@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
-import { styled } from '@mui/material/styles'
-import { Box, Typography, Paper, Button } from '@mui/material'
-import LightbulbIcon from '@mui/icons-material/Lightbulb'
-import Swal from 'sweetalert2'
-import { DataGrid } from '@mui/x-data-grid'
-import GetAppIcon from '@mui/icons-material/GetApp'
+import React, { useState } from 'react';
+import { styled } from '@mui/material/styles';
+import { Box, Typography, Paper, Button } from '@mui/material';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import Swal from 'sweetalert2';
+import { DataGrid } from '@mui/x-data-grid';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import axios from 'axios'; // Import axios for making API requests
+import baseUrl from '../../API/baseUrl';
 
 const PumpButton = styled(Button)(({ theme }) => ({
   width: '150px',
@@ -20,14 +22,14 @@ const PumpButton = styled(Button)(({ theme }) => ({
       backgroundColor: '#218838',
     },
   },
-}))
+}));
 
 const RemoteOperation = () => {
-  const [pumpOn, setPumpOn] = useState(false)
+  const [pumpOn, setPumpOn] = useState(false);
 
   const handlePumpSwitchChange = () => {
-    const isChecked = !pumpOn
-    const previousState = pumpOn
+    const isChecked = !pumpOn;
+    const previousState = pumpOn;
 
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
@@ -35,7 +37,7 @@ const RemoteOperation = () => {
         cancelButton: 'btn btn-danger',
       },
       buttonsStyling: false,
-    })
+    });
 
     swalWithBootstrapButtons
       .fire({
@@ -49,22 +51,40 @@ const RemoteOperation = () => {
       })
       .then((result) => {
         if (result.isConfirmed) {
-          setPumpOn(isChecked)
-          swalWithBootstrapButtons.fire({
-            title: isChecked ? 'Pump is ON' : 'Pump is OFF',
-            text: 'The pump has been turned.',
-            icon: 'success',
+          setPumpOn(isChecked);
+
+          axios.post(`${baseUrl}/control/pump`, {
+            deviceId: 'IOT001', 
+            command: isChecked ? 'PUMP_ON' : 'PUMP_OFF',
+            uniqueId: `#${Date.now()}`, 
           })
+            .then(response => {
+              console.log('Command sent successfully:', response.data);
+              swalWithBootstrapButtons.fire({
+                title: isChecked ? 'Pump is ON' : 'Pump is OFF',
+                text: 'The pump has been turned.',
+                icon: 'success',
+              });
+            })
+            .catch(error => {
+              console.error('Error sending command:', error);
+              setPumpOn(previousState);
+              swalWithBootstrapButtons.fire({
+                title: 'Error',
+                text: 'Failed to send command.',
+                icon: 'error',
+              });
+            });
         } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire({
             title: 'Cancelled',
             text: 'The pump state remains unchanged.',
             icon: 'error',
-          })
-          setPumpOn(previousState)
+          });
+          setPumpOn(previousState);
         }
-      })
-  }
+      });
+  };
 
   const columns = [
     { field: 'id', headerName: 'PID', width: 80 },
@@ -72,7 +92,7 @@ const RemoteOperation = () => {
     { field: 'username', headerName: 'User name', width: 190 },
     { field: 'action', headerName: 'Action', width: 190 },
     { field: 'result', headerName: 'Results', width: 190 },
-  ]
+  ];
 
   const rows = [
     {
@@ -89,26 +109,26 @@ const RemoteOperation = () => {
       action: 'pending',
       result: '-',
     },
-  ]
+  ];
 
   const handleDownload = () => {
     const csvContent = [
       columns.map((column) => column.headerName).join(','),
       ...rows.map((row) => columns.map((column) => row[column.field]).join(',')),
-    ].join('\n')
+    ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
 
-    const a = document.createElement('a')
-    a.style.display = 'none'
-    a.href = url
-    a.download = 'data.csv'
-    document.body.appendChild(a)
-    a.click()
-    URL.revokeObjectURL(url)
-    document.body.removeChild(a)
-  }
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'data.csv';
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
 
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
@@ -119,9 +139,6 @@ const RemoteOperation = () => {
         <PumpButton className={pumpOn ? 'on' : ''} onClick={handlePumpSwitchChange}>
           {pumpOn ? 'Pump is ON' : 'Pump is OFF'}
           <LightbulbIcon sx={{ fontSize: 40, color: pumpOn ? 'red' : 'grey' }} />
-          <Typography variant="h6" sx={{ ml: 2 }}>
-            {pumpOn ? '' : ''}
-          </Typography>
         </PumpButton>
       </Paper>
 
@@ -133,17 +150,12 @@ const RemoteOperation = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
           pageSizeOptions={[5, 10]}
           checkboxSelection
         />
       </div>
     </Box>
-  )
-}
+  );
+};
 
-export default RemoteOperation
+export default RemoteOperation;

@@ -1,8 +1,28 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Box, Typography, Paper, Grid, Container, Card, CardContent } from '@mui/material'
+import baseUrl from '../../API/baseUrl'
+import axios from 'axios'
 
 const Dashboard = () => {
   const [sppStatus, setSppStatus] = useState('Ok')
+  const [apidata, setAPIData] = useState([])
+  const [displaydata, setdisplayData] = useState([])
+
+  const getAPIData = async () => {
+    try {
+      const response = await axios.get(`${baseUrl}/data`)
+
+      setAPIData(response.data)
+      setdisplayData(response.data[0])
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getAPIData()
+    console.log(displaydata, '=====')
+  }, [])
 
   const handleSppStatusChange = (event) => {
     setSppStatus(event.target.value)
@@ -33,15 +53,60 @@ const Dashboard = () => {
   }
 
   const additionalSensorData = [
-    { title: 'Conductivity', value: '15', unit: 'µS/cm', range: '0 - 5000 µS/cm' },
-    { title: 'TDS', value: '300', unit: 'mg/l', range: '0 - 2000 mg/L' },
-    { title: 'pH', value: '7', unit: '', range: '0 - 14' },
-    { title: 'Residual Chlorine', value: '0.2', unit: 'mg/L', range: '0 - 2.00 mg/L' },
-    { title: 'Temperature', value: '31', unit: '°C', range: '0 - 100 °C' },
-    { title: 'TSS', value: '0.8', unit: 'mg/L', range: '0 - 2000 mg/L' },
-    { title: 'Pressure', value: '7', unit: 'bar', range: '0 - 10 bar' },
-    { title: 'Flow Rate', value: '530', unit: 'm3/hr', range: '0 - 100 m³/hr' },
-    { title: 'Totalizer', value: '5000', unit: 'm³', range: '0 - 10000 m³' },
+    {
+      title: 'Conductivity',
+      value: displaydata.conductivity !== '' ? displaydata.conductivity : '--',
+      unit: 'µS/cm',
+      range: '0 - 5000 µS/cm',
+    },
+    {
+      title: 'TDS',
+      value: displaydata.tds !== '' ? displaydata.tds : '--',
+      unit: 'mg/l',
+      range: '0 - 2000 mg/L',
+    },
+    {
+      title: 'pH',
+      value: displaydata.ph !== '' ? displaydata.ph : '--',
+      unit: '',
+      range: '0 - 14',
+    },
+    {
+      title: 'Residual Chlorine',
+      value: displaydata.residualChlorine !== '' ? displaydata.residualChlorine : '--',
+      unit: 'mg/L',
+      range: '0 - 2.00 mg/L',
+    },
+    {
+      title: 'Temperature',
+      value: displaydata.temperature !== '' ? displaydata.temperature : '--',
+      unit: '°C',
+      range: '0 - 100 °C',
+    },
+    {
+      title: 'TSS',
+      value: displaydata.tss !== '' ? displaydata.tss : '--',
+      unit: 'mg/L',
+      range: '0 - 2000 mg/L',
+    },
+    {
+      title: 'Pressure',
+      value: displaydata.pressure !== '' ? displaydata.pressure : '--',
+      unit: 'bar',
+      range: '0 - 10 bar',
+    },
+    {
+      title: 'Flow Rate',
+      value: displaydata.flowRate !== '' ? displaydata.flowRate : '--',
+      unit: 'm3/hr',
+      range: '0 - 100 m³/hr',
+    },
+    {
+      title: 'Totalizer',
+      value: displaydata.totalizer !== '' ? displaydata.totalizer : '--',
+      unit: 'm³',
+      range: '0 - 10000 m³',
+    },
   ]
 
   const SensorCard = ({ title, value, unit, range }) => {

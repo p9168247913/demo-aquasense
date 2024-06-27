@@ -7,81 +7,58 @@ import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import DownloadIcon from '@mui/icons-material/Download'
-import { CButton, CButtonGroup, CCard, CCardBody, CCol, CRow } from '@coreui/react'
+import { CCard, CCardBody, CCol, CRow } from '@coreui/react'
 import { Chart, registerables } from 'chart.js'
 Chart.register(...registerables)
-import { Line, Bar, PolarArea } from 'react-chartjs-2'
+import { Line, Bar } from 'react-chartjs-2'
 import { useToast } from '@chakra-ui/react'
-import baseUrl from "../../API/baseUrl"
-import axios from "axios";
+import baseUrl from '../../API/baseUrl'
+import axios from 'axios'
 import { format } from 'date-fns'
-import { saveAs } from 'file-saver';
-import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver'
+import * as XLSX from 'xlsx'
+import Checkbox from '@mui/material/Checkbox'
+import ListItemText from '@mui/material/ListItemText'
+import OutlinedInput from '@mui/material/OutlinedInput'
+import Chip from '@mui/material/Chip'
 
 const Analytics = () => {
-  const [selectedOption, setSelectedOption] = useState('')
-  const [showTDS, setShowTDS] = useState(false);
   const [apiData, setApiData] = useState([])
-  const [chlorineData, setChlorineData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [tssData, setTssData] = useState({
-    labels: [],
-    datasets: [],
-  })
-  const [phData, setphData] = useState({
-    labels: [],
-    datasets: [],
-  })
-  const [ecData, setecData] = useState({
-    labels: [],
-    datasets: [],
-  })
-  const [displayData, setDisplayData] = useState('ec');
-  const [pressureData, setPressureData] = useState({
-    labels: [],
-    datasets: [],
-  })
-  const [temperatureData, setTemperatureData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [flowRateData, setFlowRateData] = useState({
-    labels: [],
-    datasets: [],
-  });
-  const [totalizerData, setTotalizerData] = useState({
-    labels: [],
-    datasets: [],
-  });
+  const [chlorineData, setChlorineData] = useState({ labels: [], datasets: [] })
+  const [tssData, setTssData] = useState({ labels: [], datasets: [] })
+  const [phData, setphData] = useState({ labels: [], datasets: [] })
+  const [ecData, setecData] = useState({ labels: [], datasets: [] })
+  const [pressureData, setPressureData] = useState({ labels: [], datasets: [] })
+  const [temperatureData, setTemperatureData] = useState({ labels: [], datasets: [] })
+  const [flowRateData, setFlowRateData] = useState({ labels: [], datasets: [] })
+  const [totalizerData, setTotalizerData] = useState({ labels: [], datasets: [] })
+  const [selectedColumns, setSelectedColumns] = useState([])
 
   const getData = async () => {
     try {
       const response = await axios.get(`${baseUrl}/data`)
       if (response.data) {
-        const limitedData = response.data.slice(0, 10);
-        const sortedData = limitedData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+        const limitedData = response.data.slice(0, 10)
+        const sortedData = limitedData.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
 
         setApiData(response.data)
-        console.log("response", response.data);
+        console.log('response', response.data)
         processChlorineData(sortedData)
         processTssData(sortedData)
         processphData(sortedData)
         processECData(sortedData)
         processPresureData(sortedData)
-        processTemperatureData(sortedData);
+        processTemperatureData(sortedData)
         processFlowRateData(sortedData)
         processTotalizerData(sortedData)
       }
-
     } catch (error) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   const handleDownload = () => {
-    const filteredData = apiData.map(({ _id, createdAt, updatedAt, __v, ...rest }) => rest);
+    const filteredData = apiData.map(({ _id, createdAt, updatedAt, __v, ...rest }) => rest)
     const dataWithHeadings = [
       {
         deviceId: 'Device ID',
@@ -99,20 +76,47 @@ const Analytics = () => {
         totalizer: 'Totalizer',
       },
       ...filteredData,
-    ];
+    ]
 
-    const worksheet = XLSX.utils.json_to_sheet(dataWithHeadings, { skipHeader: true });
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'IoT Data');
+    const filteredColumns = selectedColumns.length
+      ? ['deviceId', 'dateTime', 'phoneNo', 'batteryPercentage', ...selectedColumns]
+      : [
+          'deviceId',
+          'dateTime',
+          'phoneNo',
+          'batteryPercentage',
+          'conductivity',
+          'tds',
+          'ph',
+          'residualChlorine',
+          'temperature',
+          'tss',
+          'pressure',
+          'flowRate',
+          'totalizer',
+        ]
 
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(blob, 'iot_data.xlsx');
+    const worksheetData = dataWithHeadings.map((row) =>
+      filteredColumns.reduce((acc, column) => {
+        acc[column] = row[column]
+        return acc
+      }, {}),
+    )
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData, { skipHeader: true })
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'IoT Data')
+
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+    saveAs(blob, 'iot_data.xlsx')
   }
 
   const processChlorineData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
-    const residualChlorine = data.map(item => item.residualChlorine === "" ? null : item.residualChlorine)
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const residualChlorine = data.map((item) =>
+      item.residualChlorine === '' ? null : item.residualChlorine,
+    )
 
     const chartData = {
       labels: labels,
@@ -129,8 +133,8 @@ const Analytics = () => {
     setChlorineData(chartData)
   }
   const processTssData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
-    const tss = data.map(item => item.tss === "" ? null : item.tss)
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const tss = data.map((item) => (item.tss === '' ? null : item.tss))
 
     const chartData = {
       labels: labels,
@@ -147,26 +151,26 @@ const Analytics = () => {
     setTssData(chartData)
   }
   const processphData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
-    const ph = data.map(item => item.ph === "" ? null : item.ph)
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const ph = data.map((item) => (item.ph === '' ? null : item.ph))
 
-    const backgroundColors = ph.map(value => {
+    const backgroundColors = ph.map((value) => {
       if (value < 7) {
-        return 'rgba(255, 99, 132, 0.5)'; // Red for acidic
+        return 'rgba(255, 99, 132, 0.5)' // Red for acidic
       } else if (value == 7) {
-        return 'rgba(255, 206, 86, 0.5)'; // Yellow for neutral
+        return 'rgba(255, 206, 86, 0.5)' // Yellow for neutral
       } else {
-        return 'rgba(75, 192, 192, 0.5)'; // Blue for basic
+        return 'rgba(75, 192, 192, 0.5)' // Blue for basic
       }
     })
 
-    const borderColors = ph.map(value => {
+    const borderColors = ph.map((value) => {
       if (value < 7) {
-        return 'rgba(255, 99, 132, 1)'; // Red for acidic
+        return 'rgba(255, 99, 132, 1)' // Red for acidic
       } else if (value == 7) {
-        return 'rgba(255, 206, 86, 1)'; // Yellow for neutral
+        return 'rgba(255, 206, 86, 1)' // Yellow for neutral
       } else {
-        return 'rgba(75, 192, 192, 1)'; // Blue for basic
+        return 'rgba(75, 192, 192, 1)' // Blue for basic
       }
     })
 
@@ -185,8 +189,8 @@ const Analytics = () => {
     setphData(chartData)
   }
   const processECData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
-    const conductivity = data.map(item => item.conductivity === "" ? null : item.conductivity)
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const conductivity = data.map((item) => (item.conductivity === '' ? null : item.conductivity))
 
     const chartData = {
       labels: labels,
@@ -203,8 +207,8 @@ const Analytics = () => {
     setecData(chartData)
   }
   const processPresureData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
-    const pressure = data.map(item => item.pressure === "" ? null : item.pressure)
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const pressure = data.map((item) => (item.pressure === '' ? null : item.pressure))
 
     const chartData = {
       labels: labels,
@@ -221,401 +225,197 @@ const Analytics = () => {
     setPressureData(chartData)
   }
   const processTemperatureData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
-    const temperature = data.map(item => item.temperature === "" ? null : item.temperature);
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const temperature = data.map((item) => (item.temperature === '' ? null : item.temperature))
 
     const chartData = {
       labels: labels,
       datasets: [
         {
-          label: 'Water Temperature (°C)',
-          backgroundColor: 'rgba(153, 102, 255, 0.2)',
-          borderColor: 'rgba(153, 102, 255, 1)',
+          label: 'Temperature (°C)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 2,
           data: temperature,
         },
       ],
-    };
-    setTemperatureData(chartData);
-  };
+    }
+    setTemperatureData(chartData)
+  }
   const processFlowRateData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
-    const flowRate = data.map(item => item.flowRate === "" ? null : item.flowRate);
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const flowRate = data.map((item) => (item.flowRate === '' ? null : item.flowRate))
 
     const chartData = {
       labels: labels,
       datasets: [
         {
-          label: 'Flow Rate (L/s)',
-          backgroundColor: 'rgba(255, 159, 64, 0.2)',
-          borderColor: 'rgba(255, 159, 64, 1)',
+          label: 'Flow Rate (L/min)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 2,
           data: flowRate,
         },
       ],
-    };
-    setFlowRateData(chartData);
-  };
+    }
+    setFlowRateData(chartData)
+  }
   const processTotalizerData = (data) => {
-    const labels = data.map(item => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'));
-    const totalizedVolume = data.map(item => item.totalizedVolume === "" ? null : item.totalizedVolume);
+    const labels = data.map((item) => format(new Date(item.createdAt), 'MM/dd/yyyy HH:mm'))
+    const totalizer = data.map((item) => (item.totalizer === '' ? null : item.totalizer))
 
     const chartData = {
       labels: labels,
       datasets: [
         {
-          label: 'Totalized Volume (m³)',
-          backgroundColor: 'rgba(54, 162, 235, 0.2)',
-          borderColor: 'rgba(54, 162, 235, 1)',
+          label: 'Totalizer (L)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 2,
-          data: totalizedVolume,
+          data: totalizer,
         },
       ],
-    };
-    setTotalizerData(chartData);
-  };
+    }
+    setTotalizerData(chartData)
+  }
 
   useEffect(() => {
-    getData();
+    getData()
   }, [])
+
+  const handleSelectChange = (event) => {
+    setSelectedColumns(event.target.value)
+  }
 
   const handleChange = (event) => {
     setSelectedOption(event.target.value)
   }
 
-  const handleButtonClick = (option) => {
-    setDisplayData(option);
-  };
-
-  const convertToTDS = (ecData) => {
-    const conversionFactor = 0.67;
-    return ecData.map(value => value * conversionFactor);
-  };
-
-  const ecOrTdsData = () => {
-    if (displayData === 'tds') {
-      const labels = ecData.labels;
-      const tds = convertToTDS(ecData.datasets[0].data);
-
-      return {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Total Dissolved Solids (mg/l)',
-            backgroundColor: 'rgba(255, 159, 64, 0.2)',
-            borderColor: 'rgba(255, 159, 64, 1)',
-            borderWidth: 2,
-            data: tds,
-          },
-        ],
-      };
-    }
-    return ecData;
-  };
-
-  const ECoptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: displayData === 'tds' ? 'TDS (mg/l)' : 'Electrical Conductivity (mS/cm)',
-        },
-        suggestedMin: 0,
-        suggestedMax: Infinity,
-        beginAtZero: true,
-      },
-    },
-  };
-
-  const toast = useToast();
-
-  const options = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Chlorine (mg/l)',
-        },
-        suggestedMin: 0,
-        suggestedMax: Infinity,
-        beginAtZero: true,
-      },
-    },
-  }
-
-  const options1 = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'TSS (mg/l)',
-        },
-        suggestedMin: 0,
-        suggestedMax: Infinity,
-        beginAtZero: true,
-      },
-    },
-  }
-
-  const phOptions = {
-    indexAxis: 'x',
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-        stacked: true,
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'ph Level',
-        },
-        beginAtZero: true,
-        max: 14,
-      },
-    },
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
-  }
-
-  const pressureOptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Pressure (Bar)',
-        },
-        suggestedMin: 0,
-        suggestedMax: Infinity,
-        beginAtZero: true,
-      },
-    },
-  };
-
-  const temperatureOptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Temperature (°C)',
-        },
-        suggestedMin: 0,
-        suggestedMax: 40,
-      },
-    },
-  };
-
-  const flowRateOptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Flow Rate (L/s)',
-        },
-        suggestedMin: 0,
-        suggestedMax: 20,
-        beginAtZero: true,
-      },
-    },
-  };
-
-  const totalizerOptions = {
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Time',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Totalized Volume (m³)',
-        },
-        suggestedMin: 0,
-        suggestedMax: 500,
-        beginAtZero: true,
-      },
-    },
-  };
-
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>Analytics</h4>
-        <Box display="flex" justifyContent="flex-end" p={2} marginLeft={'530px'}>
-          <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-            <InputLabel id="dropdown-label">Select Device</InputLabel>
-            <Select
-              labelId="dropdown-label"
-              id="dropdown"
-              value={selectedOption}
-              onChange={handleChange}
-              label="Select Option"
-            >
-              <MenuItem value="">{/* <em>None</em> */}</MenuItem>
-              <MenuItem value={10}>Device1</MenuItem>
-              <MenuItem value={20}>Device2</MenuItem>
-              <MenuItem value={30}>Device3</MenuItem>
-              <MenuItem value={40}>Device4</MenuItem>
-              <MenuItem value={50}>Device5</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl variant="outlined" sx={{ minWidth: 200, mr: 2 }}>
-            <InputLabel id="dropdown-label">Select Site</InputLabel>
-            <Select
-              labelId="dropdown-label"
-              id="dropdown"
-              value={selectedOption}
-              onChange={handleChange}
-              label="Select Option"
-            >
-              <MenuItem value="">{/* <em>None</em> */}</MenuItem>
-              <MenuItem value={10}>Site1</MenuItem>
-              <MenuItem value={20}>Site2</MenuItem>
-              <MenuItem value={30}>Site3</MenuItem>
-              <MenuItem value={40}>Site4</MenuItem>
-              <MenuItem value={50}>Site5</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        <IconButton color="primary" onClick={handleDownload}>
-          <DownloadIcon />
-        </IconButton>
       </div>
-
       <CRow>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4 fixed-size-card">
-            <CCardBody>
-              <h4>Chlorine Levels</h4>
-              <Line data={chlorineData} options={options} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
+        <CCol>
           <CCard className="mb-4">
             <CCardBody>
-              <h4>TSS Levels</h4>
-              <Bar data={tssData} options={options1} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-
-      <CRow>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardBody>
-              <h4>pH Levels</h4>
-              <Line data={phData} options={phOptions} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardBody >
-              <div style={{ display: "flex", gap: "20px" }}>
-                <h4>Electrical Conductivity / TDS</h4>
-
-                <div className="mb-3">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => handleButtonClick('electricalConductivity')}
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+                <FormControl sx={{ m: 1, minWidth: 120, maxWidth: 300 }}>
+                  <InputLabel>Columns</InputLabel>
+                  <Select
+                    multiple
+                    value={selectedColumns}
+                    onChange={handleSelectChange}
+                    input={<OutlinedInput label="Columns" />}
+                    renderValue={(selected) => (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                        {selected.map((value) => (
+                          <Chip key={value} label={value} />
+                        ))}
+                      </Box>
+                    )}
                   >
-                    EC
-                  </Button>&nbsp;
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={() => handleButtonClick('tds')}
-                  >
-                    TDS
-                  </Button>
-                </div>
-              </div>
-              <Line data={ecOrTdsData()} options={ECoptions} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-
-      <CRow>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardBody>
-              <h4>Pressure Levels</h4>
-              <Line data={pressureData} options={pressureOptions} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardBody>
-              <h4>Water Temperature</h4>
-              <Line data={temperatureData} options={temperatureOptions} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-
-      <CRow>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4">
-            <CCardBody>
-              <h4>Flow Rate</h4>
-              <Line data={flowRateData} options={flowRateOptions} />
-            </CCardBody>
-          </CCard>
-        </CCol>
-        <CCol xs={12} md={6}>
-          <CCard className="mb-4 ">
-            <CCardBody>
-              <h4>Totalized Volume</h4>
-              <Bar data={totalizerData} options={totalizerOptions} />
+                    <MenuItem value="conductivity">
+                      <Checkbox checked={selectedColumns.indexOf('conductivity') > -1} />
+                      <ListItemText primary="Conductivity" />
+                    </MenuItem>
+                    <MenuItem value="tds">
+                      <Checkbox checked={selectedColumns.indexOf('tds') > -1} />
+                      <ListItemText primary="TDS" />
+                    </MenuItem>
+                    <MenuItem value="ph">
+                      <Checkbox checked={selectedColumns.indexOf('ph') > -1} />
+                      <ListItemText primary="pH" />
+                    </MenuItem>
+                    <MenuItem value="residualChlorine">
+                      <Checkbox checked={selectedColumns.indexOf('residualChlorine') > -1} />
+                      <ListItemText primary="Residual Chlorine" />
+                    </MenuItem>
+                    <MenuItem value="temperature">
+                      <Checkbox checked={selectedColumns.indexOf('temperature') > -1} />
+                      <ListItemText primary="Temperature" />
+                    </MenuItem>
+                    <MenuItem value="tss">
+                      <Checkbox checked={selectedColumns.indexOf('tss') > -1} />
+                      <ListItemText primary="TSS" />
+                    </MenuItem>
+                    <MenuItem value="pressure">
+                      <Checkbox checked={selectedColumns.indexOf('pressure') > -1} />
+                      <ListItemText primary="Pressure" />
+                    </MenuItem>
+                    <MenuItem value="flowRate">
+                      <Checkbox checked={selectedColumns.indexOf('flowRate') > -1} />
+                      <ListItemText primary="Flow Rate" />
+                    </MenuItem>
+                    <MenuItem value="totalizer">
+                      <Checkbox checked={selectedColumns.indexOf('totalizer') > -1} />
+                      <ListItemText primary="Totalizer" />
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+                <IconButton color="primary" onClick={handleDownload}>
+                  <DownloadIcon />
+                </IconButton>
+              </Box>
+              <Box>
+                <CRow>
+                  <CCol xs={12} md={6} mb={4}>
+                    <h4>Chlorine Levels</h4>
+                    <Box mb={4}>
+                      <Line data={chlorineData} />
+                    </Box>
+                  </CCol>
+                  <CCol xs={12} md={6} mb={4}>
+                    <h4>TSS Levels</h4>
+                    <Box mb={4}>
+                      <Line data={tssData} />
+                    </Box>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol xs={12} md={6} mb={4}>
+                    <h4>pH Levels</h4>
+                    <Box mb={4}>
+                      <Line data={phData} />
+                    </Box>
+                  </CCol>
+                  <CCol xs={12} md={6} mb={4}>
+                    <h4>Electrical Conductivity / TDS</h4>
+                    <Box mb={4}>
+                      <Line data={ecData} />
+                    </Box>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol xs={12} md={6} mb={4}>
+                  <h4>Pressure Bar</h4>
+                    <Box mb={4}>
+                      <Line data={pressureData} />
+                    </Box>
+                  </CCol>
+                  <CCol xs={12} md={6} mb={4}>
+                  <h4>Temperature</h4>
+                    <Box mb={4}>
+                      <Line data={temperatureData} />
+                    </Box>
+                  </CCol>
+                </CRow>
+                <CRow>
+                  <CCol xs={12} md={6} mb={4}>
+                  <h4>Flow Rate</h4>
+                    <Box mb={4}>
+                      <Line data={flowRateData} />
+                    </Box>
+                  </CCol>
+                  <CCol xs={12} md={6} mb={4}>
+                  <h4>Totalizer</h4>
+                    <Box mb={4}>
+                      <Line data={totalizerData} />
+                    </Box>
+                  </CCol>
+                </CRow>
+              </Box>
             </CCardBody>
           </CCard>
         </CCol>

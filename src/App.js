@@ -5,6 +5,8 @@ import { CSpinner, useColorModes } from '@coreui/react';
 import './scss/style.scss';
 import axios from 'axios';
 import baseUrl from './API/baseUrl'
+import 'bootstrap/dist/css/bootstrap.min.css'
+
 
 // Containers
 const DefaultLayout = React.lazy(() => import('./layout/DefaultLayout'));

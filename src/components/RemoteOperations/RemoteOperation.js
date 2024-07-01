@@ -1,37 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { styled } from '@mui/material/styles'
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-} from '@mui/material'
-import LightbulbIcon from '@mui/icons-material/Lightbulb'
+import { Container, Row, Col, Card, Button, Form, Table } from 'react-bootstrap'
 import Swal from 'sweetalert2'
-import { DataGrid } from '@mui/x-data-grid'
-import GetAppIcon from '@mui/icons-material/GetApp'
 import axios from 'axios'
 import baseUrl from '../../API/baseUrl'
-
-const PumpButton = styled(Button)(({ theme }) => ({
-  width: '150px',
-  height: '50px',
-  backgroundColor: 'red',
-  color: '#fff',
-  '&:hover': {
-    backgroundColor: 'orange',
-  },
-  '&.on': {
-    backgroundColor: '#28a745',
-    '&:hover': {
-      backgroundColor: '#218838',
-    },
-  },
-}))
 
 const RemoteOperation = () => {
   const [pumpOn, setPumpOn] = useState(false)
@@ -50,7 +21,7 @@ const RemoteOperation = () => {
 
     Swal.fire({
       title: 'Are you sure?',
-      text: `The pump will be turneds ${command === 'PUMP_ON' ? 'ON' : 'OFF'}.`,
+      text: `The pump will be turned ${command === 'PUMP_ON' ? 'ON' : 'OFF'}.`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonText: 'Yes!',
@@ -64,7 +35,7 @@ const RemoteOperation = () => {
             if (response.data.success) {
               Swal.fire(
                 'Request sent',
-                `The pump will be turneds ${command === 'PUMP_ON' ? 'ON' : 'OFF'}.`,
+                `The pump will be turned ${command === 'PUMP_ON' ? 'ON' : 'OFF'}.`,
                 'success',
               )
               const newRow = {
@@ -87,18 +58,12 @@ const RemoteOperation = () => {
     })
   }
 
-  const columns = [
-    { field: 'id', headerName: 'PID', width: 80 },
-    { field: 'timestamps', headerName: 'TimeStamp', width: 270 },
-    { field: 'username', headerName: 'User name', width: 190 },
-    { field: 'action', headerName: 'Action', width: 190 },
-    { field: 'result', headerName: 'Results', width: 190 },
-  ]
-
   const handleDownload = () => {
     const csvContent = [
-      columns.map((column) => column.headerName).join(','),
-      ...rows.map((row) => columns.map((column) => row[column.field]).join(',')),
+      ['PID', 'TimeStamp', 'User name', 'Action', 'Results'].join(','),
+      ...rows.map((row) =>
+        [row.id, row.timestamps, row.username, row.action, row.result].join(','),
+      ),
     ].join('\n')
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -119,7 +84,6 @@ const RemoteOperation = () => {
       axios
         .get(`${baseUrl}/control/pump/status/${selectedDevice}`)
         .then((response) => {
-          console.log('resp', response.data)
           if (response.data.success) {
             setPumpOn(response.data.status === 'ACK')
           }
@@ -129,58 +93,84 @@ const RemoteOperation = () => {
         })
     }
   }
+
   const changeValue = (val) => {
     setSelectedDevice(val)
     getStatusByDeviceId()
   }
+
   useEffect(() => {
     getStatusByDeviceId()
   }, [selectedDevice])
 
   return (
-    <Box sx={{ flexGrow: 1, p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Pump Control
-      </Typography>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel id="device-select-label">Select Device</InputLabel>
-          <Select
-            labelId="device-select-label"
-            value={selectedDevice}
-            onChange={(e) => changeValue(e.target.value)}
-          >
-            {devices.map((device) => (
-              <MenuItem key={device} value={device}>
-                {device}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <PumpButton className={pumpOn ? 'on' : ''} onClick={handlePumpSwitchChange}>
-          {pumpOn ? 'Pump is ON' : 'Pump is OFF'}
-          <LightbulbIcon sx={{ fontSize: 40, color: pumpOn ? 'red' : 'grey' }} />
-        </PumpButton>
-      </Paper>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px' }}>
-        <h3>Logs</h3>
-        <GetAppIcon onClick={handleDownload} style={{ cursor: 'pointer' }} />
-      </div>
-      <div style={{ height: 400, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-          pageSizeOptions={[5, 10]}
-          checkboxSelection
-        />
-      </div>
-    </Box>
+    <Container>
+      <Row className="mb-4">
+        <Col>
+          <h4>Pump Control</h4>
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <Card>
+            <Card.Body>
+              <Form.Group className="mb-3">
+                <Form.Label>Select Device</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={selectedDevice}
+                  onChange={(e) => changeValue(e.target.value)}
+                >
+                  <option value="">Select a device</option>
+                  {devices.map((device) => (
+                    <option key={device} value={device}>
+                      {device}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+              <Button
+                variant={pumpOn ? 'success' : 'danger'}
+                onClick={handlePumpSwitchChange}
+                className="d-flex align-items-center"
+              >
+                {pumpOn ? 'Pump is ON' : 'Pump is OFF'}
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+      <Row className="mt-4">
+        <Col>
+          <h5>Logs</h5>
+          <Button variant="info" className="mb-3" onClick={handleDownload}>
+            Download Logs
+          </Button>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>TimeStamp</th>
+                <th>User name</th>
+                <th>Action</th>
+                <th>Results</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.id}>
+                  <td>{row.id}</td>
+                  <td>{row.timestamps}</td>
+                  <td>{row.username}</td>
+                  <td>{row.action}</td>
+                  <td>{row.result}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </Col>
+      </Row>
+    </Container>
   )
 }
 

@@ -1,19 +1,6 @@
 import React, { useState } from 'react'
-import {
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-  IconButton,
-  InputAdornment,
-  MenuItem,
-  Modal,
-} from '@mui/material'
+import { Button, Container, Form, Row, Col, Image, InputGroup } from 'react-bootstrap'
 import { Visibility, VisibilityOff, Edit } from '@mui/icons-material'
-import { styled } from '@mui/system'
 
 const roles = [
   { value: 'admin', label: 'Admin' },
@@ -21,35 +8,12 @@ const roles = [
   { value: 'guest', label: 'Guest' },
 ]
 
-const ProfileContainer = styled(Container)(({ theme }) => ({
-  marginTop: theme.spacing(4),
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-}))
-
-const ProfileAvatar = styled(Avatar)(({ theme }) => ({
-  width: theme.spacing(15),
-  height: theme.spacing(15),
-  marginBottom: theme.spacing(2),
-}))
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 600,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-}
-
 const Profile = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [open, setOpen] = useState(false)
-  const [profile, setProfile] = useState({
+  const [editMode, setEditMode] = useState(false) // State to manage edit mode
+
+  const initialProfileState = {
     name: 'John Doe',
     email: 'johndoe@example.com',
     phone: '123-456-7890',
@@ -57,253 +21,169 @@ const Profile = () => {
     deviceId: '12345',
     password: 'password123',
     confirmPassword: 'password123',
-    profileImage: '',
-  })
-
-  const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value })
+    profileImage: 'https://via.placeholder.com/150',
   }
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword)
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword)
+  const [profile, setProfile] = useState(initialProfileState)
+  const [editableProfile, setEditableProfile] = useState(initialProfileState) // Separate state for editable profile
 
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault()
+  const handleChange = (e) => {
+    setEditableProfile({ ...editableProfile, [e.target.name]: e.target.value })
   }
 
   const handleSaveChanges = () => {
     // Handle save changes logic here
-    console.log(profile)
-    handleClose()
+    setProfile(editableProfile) // Update main profile state with edited values
+    setEditMode(false) // Exit edit mode
   }
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
+  const toggleEditMode = () => {
+    if (!editMode) {
+      setEditableProfile(profile) // Initialize editableProfile with current profile data
+    }
+    setEditMode(!editMode) // Toggle edit mode
+  }
+
+  
 
   return (
-    <ProfileContainer>
-      <ProfileAvatar src={profile.profileImage} />
-      <Typography component="h1" variant="h5">
+    <Container className="mt-4 d-flex flex-column align-items-center">
+      <Image
+        src={profile.profileImage}
+        alt="Profile"
+        roundedCircle
+        className="mb-2"
+        style={{ width: '200px', height: '200px' }}
+      />
+      <h1>
         User Profile
-        <IconButton onClick={handleOpen}>
+        <Button variant="link" onClick={toggleEditMode}>
           <Edit />
-        </IconButton>
-      </Typography>
-      <Box component="form" noValidate sx={{ mt: 3 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              name="name"
-              variant="outlined"
-              required
-              fullWidth
-              id="name"
-              label="Name"
-              value={profile.name}
-              onChange={handleChange}
-              disabled
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              variant="outlined"
-              required
-              fullWidth
-              id="email"
-              label="Email"
-              name="email"
-              value={profile.email}
-              onChange={handleChange}
-              disabled
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              variant="outlined"
-              required
-              fullWidth
-              id="phone"
-              label="Phone Number"
-              name="phone"
-              value={profile.phone}
-              onChange={handleChange}
-              disabled
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              select
-              variant="outlined"
-              required
-              fullWidth
-              id="role"
-              label="Role"
-              name="role"
-              value={profile.role}
-              onChange={handleChange}
-              disabled
-            >
-              {roles.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              variant="outlined"
-              required
-              fullWidth
-              id="deviceId"
-              label="Device ID"
-              name="deviceId"
-              value={profile.deviceId}
-              onChange={handleChange}
-              disabled
-            />
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Modal open={open} onClose={handleClose}>
-        <Box sx={modalStyle}>
-          <Typography component="h1" variant="h5" gutterBottom>
-            Edit Profile
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
+        </Button>
+      </h1>
+      <Form className="w-100 mt-3">
+        <Row>
+          <Col sm={6}>
+            <Form.Group controlId="name">
+              <Form.Label className=''>Name</Form.Label>
+              <Form.Control
+                type="text"
                 name="name"
-                variant="outlined"
-                required
-                fullWidth
-                id="name"
-                label="Name"
-                value={profile.name}
+                value={editMode ? editableProfile.name : profile.name}
                 onChange={handleChange}
+                disabled={!editMode}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email"
+            </Form.Group>
+          </Col>
+          <Col sm={6}>
+            <Form.Group controlId="email">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
                 name="email"
-                value={profile.email}
+                value={editMode ? editableProfile.email : profile.email}
                 onChange={handleChange}
+                disabled={!editMode}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="phone"
-                label="Phone Number"
+            </Form.Group>
+          </Col>
+          <Col sm={6}>
+            <Form.Group controlId="phone">
+              <Form.Label>Phone Number</Form.Label>
+              <Form.Control
+                type="text"
                 name="phone"
-                value={profile.phone}
+                value={editMode ? editableProfile.phone : profile.phone}
                 onChange={handleChange}
+                disabled={!editMode}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                select
-                variant="outlined"
-                required
-                fullWidth
-                id="role"
-                label="Role"
+            </Form.Group>
+          </Col>
+          <Col sm={6}>
+            <Form.Group controlId="role">
+              <Form.Label>Role</Form.Label>
+              <Form.Control
+                as="select"
                 name="role"
-                value={profile.role}
+                value={editMode ? editableProfile.role : profile.role}
                 onChange={handleChange}
+                disabled={!editMode}
               >
                 {roles.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
+                  <option key={option.value} value={option.value}>
                     {option.label}
-                  </MenuItem>
+                  </option>
                 ))}
-              </TextField>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="deviceId"
-                label="Device ID"
+              </Form.Control>
+            </Form.Group>
+          </Col>
+          <Col sm={6}>
+            <Form.Group controlId="deviceId">
+              <Form.Label>Device ID</Form.Label>
+              <Form.Control
+                type="text"
                 name="deviceId"
-                value={profile.deviceId}
+                value={editMode ? editableProfile.deviceId : profile.deviceId}
                 onChange={handleChange}
+                disabled={!editMode}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={profile.password}
-                onChange={handleChange}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle password visibility"
-                        onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                      >
-                        {showPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="confirmPassword"
-                label="Confirm Password"
-                type={showConfirmPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                value={profile.confirmPassword}
-                onChange={handleChange}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label="toggle confirm password visibility"
-                        onClick={handleClickShowConfirmPassword}
-                        onMouseDown={handleMouseDownPassword}
-                      >
-                        {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Grid>
-          </Grid>
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-            onClick={handleSaveChanges}
-          >
+            </Form.Group>
+          </Col>
+          {editMode && (
+            <>
+              <Col sm={6}>
+                <Form.Group controlId="password">
+                  <Form.Label>Password</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={editableProfile.password}
+                      onChange={handleChange}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{ zIndex: 1 }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </Button>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+              <Col sm={6}>
+                <Form.Group controlId="confirmPassword">
+                  <Form.Label>Confirm Password</Form.Label>
+                  <InputGroup>
+                    <Form.Control
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={editableProfile.confirmPassword}
+                      onChange={handleChange}
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      style={{ zIndex: 1 }}
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </Button>
+                  </InputGroup>
+                </Form.Group>
+              </Col>
+            </>
+          )}
+        </Row>
+      </Form>
+
+      {editMode && (
+        <div className="text-center mt-3">
+          <Button variant="primary" onClick={handleSaveChanges}>
             Save Changes
           </Button>
-        </Box>
-      </Modal>
-    </ProfileContainer>
+        </div>
+      )}
+    </Container>
   )
 }
 

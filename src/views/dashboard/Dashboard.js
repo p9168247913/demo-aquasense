@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Typography, Paper, Grid, Container, Card, CardContent } from '@mui/material'
+import { Container, Row, Col, Card } from 'react-bootstrap'
 import baseUrl from '../../API/baseUrl'
 import axios from 'axios'
 
@@ -34,6 +34,7 @@ const Dashboard = () => {
     dolTrip: false,
     pumpStatus: '',
     sppStatus: 'ok',
+    operationMode:'automatically',
     voltage: '212V',
     current: '0A',
     watts: '227W',
@@ -126,144 +127,134 @@ const Dashboard = () => {
     const dateString = currentDate.toLocaleString()
 
     return (
-      <Card sx={{ minWidth: 275, margin: 2, background: cardGradients[title] }}>
-        <CardContent>
-          <Typography variant="h5" component="div" sx={{ color: 'white' }}>
-            {title}
-          </Typography>
-          <Typography variant="h4" sx={{ color: 'white' }}>
+      <Card style={{ minWidth: '275px', margin: '10px',border:"2px" ,background: cardGradients[title] }}>
+        <Card.Body>
+          <Card.Title style={{ color: 'white' }}>{title}</Card.Title>
+          <Card.Text style={{ color: 'white', fontSize: '1.5rem' }}>
             {value} {unit}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'white' }}>
-            Range: {range}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'white' }}>
-            Last Updated: {dateString}
-          </Typography>
-        </CardContent>
+          </Card.Text>
+          <Card.Text style={{ color: 'white' }}>Range: {range}</Card.Text>
+          <Card.Text style={{ color: 'white' }}>Last Updated: {dateString}</Card.Text>
+        </Card.Body>
       </Card>
     )
   }
 
   return (
     <Container>
-      <Typography
-        variant="h3"
-        sx={{ mt: 4, mb: 4, color: '#1976d2', fontWeight: 'bold', textAlign: 'center' }}
-      >
-        Recent Measurement
-      </Typography>
-      <Grid container spacing={2}>
+      <h3 className="text-primary fw-bold text-center mt-4 mb-4">Recent Measurement</h3>
+      <Row>
         {additionalSensorData.map((sensor, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Col xs={12} sm={6} md={4} key={index}>
             <SensorCard
               title={sensor.title}
               value={sensor.value}
               unit={sensor.unit}
               range={sensor.range}
             />
-          </Grid>
+          </Col>
         ))}
-      </Grid>
-      <Typography
-        variant="h3"
-        sx={{ mt: 4, mb: 4, color: '#1976d2', fontWeight: 'bold', textAlign: 'center' }}
-      >
-        Recent Status Indicator
-      </Typography>
-      <Paper elevation={3} sx={{ p: 3, mt: 4 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">Tank Low</Typography>
-              <Typography variant="body1" color={sensorData.tankLow ? 'error' : 'textSecondary'}>
+      </Row>
+      <h3 className="text-primary fw-bold text-center mt-4 mb-4">Recent Status Indicator</h3>
+      <Card className="p-3 mt-4">
+        <Row>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>Tank Low</Card.Title>
+              <Card.Text className={sensorData.tankLow ? 'text-danger' : 'text-secondary'}>
                 {sensorData.tankLow ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">Tank Overflow</Typography>
-              <Typography variant="body1" color={sensorData.tankHigh ? 'error' : 'textSecondary'}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>Tank Overflow</Card.Title>
+              <Card.Text className={sensorData.tankHigh ? 'text-danger' : 'text-secondary'}>
                 {sensorData.tankHigh ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">DOL Trip</Typography>
-              <Typography variant="body1" color={sensorData.dolTrip ? 'error' : 'textSecondary'}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>DOL Trip</Card.Title>
+              <Card.Text className={sensorData.dolTrip ? 'text-danger' : 'text-secondary'}>
                 {sensorData.dolTrip ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">Pump Status</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.pumpStatus) }}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>Pump Status</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
                 {sensorData.pumpStatus ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">SPP Status</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.pumpStatus) }}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>SPP Status</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
                 {sensorData.pumpStatus ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">SPP Status (Reverse)</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.pumpStatus) }}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>SPP Status (Reverse)</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
                 {sensorData.pumpStatus ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">SPP Status (Missing)</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.pumpStatus) }}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>SPP Status (Missing)</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
                 {sensorData.pumpStatus ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Paper elevation={1} sx={{ p: 2 }}>
-              <Typography variant="h6">SPP Status (Asymmetry)</Typography>
-              <Typography variant="body1" sx={{ color: getStatusColor(sensorData.pumpStatus) }}>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>SPP Status (Asymmetry)</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
                 {sensorData.pumpStatus ? 'Alert' : 'OK'}
-              </Typography>
-            </Paper>
-          </Grid>
-        </Grid>
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Electrical Parameters
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={1} sx={{ p: 2 }}>
-                <Typography variant="h6">Voltage</Typography>
-                <Typography variant="body1">{sensorData.voltage}</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={1} sx={{ p: 2 }}>
-                <Typography variant="h6">Current</Typography>
-                <Typography variant="body1">{sensorData.current}</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={12} sm={4}>
-              <Paper elevation={1} sx={{ p: 2 }}>
-                <Typography variant="h6">Watts</Typography>
-                <Typography variant="body1">{sensorData.watts}</Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
+              </Card.Text>
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} md={4}>
+            <Card className="p-2 mb-2">
+              <Card.Title>Operation Mode</Card.Title>
+              <Card.Text style={{ color: getStatusColor(sensorData.pumpStatus) }}>
+                {sensorData.pumpStatus ? 'Alert' : 'Automatically'}
+              </Card.Text>
+            </Card>
+          </Col>
+        </Row>
+        <div className="mt-4">
+          <h5>Electrical Parameters</h5>
+          <Row>
+            <Col xs={12} sm={4}>
+              <Card className="p-2 mb-2">
+                <Card.Title>Voltage</Card.Title>
+                <Card.Text>{sensorData.voltage}</Card.Text>
+              </Card>
+            </Col>
+            <Col xs={12} sm={4}>
+              <Card className="p-2 mb-2">
+                <Card.Title>Current</Card.Title>
+                <Card.Text>{sensorData.current}</Card.Text>
+              </Card>
+            </Col>
+            <Col xs={12} sm={4}>
+              <Card className="p-2 mb-2">
+                <Card.Title>Watts</Card.Title>
+                <Card.Text>{sensorData.watts}</Card.Text>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </Card>
     </Container>
   )
 }

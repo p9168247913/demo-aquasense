@@ -389,13 +389,13 @@ const Analytics = () => {
                 </CRow>
                 <CRow>
                   <CCol xs={12} md={6} mb={4}>
-                  <h4>Pressure Bar</h4>
+                    <h4>Pressure Bar</h4>
                     <Box mb={4}>
                       <Line data={pressureData} />
                     </Box>
                   </CCol>
                   <CCol xs={12} md={6} mb={4}>
-                  <h4>Temperature</h4>
+                    <h4>Temperature</h4>
                     <Box mb={4}>
                       <Line data={temperatureData} />
                     </Box>
@@ -403,13 +403,13 @@ const Analytics = () => {
                 </CRow>
                 <CRow>
                   <CCol xs={12} md={6} mb={4}>
-                  <h4>Flow Rate</h4>
+                    <h4>Flow Rate</h4>
                     <Box mb={4}>
                       <Line data={flowRateData} />
                     </Box>
                   </CCol>
                   <CCol xs={12} md={6} mb={4}>
-                  <h4>Totalizer</h4>
+                    <h4>Totalizer</h4>
                     <Box mb={4}>
                       <Line data={totalizerData} />
                     </Box>

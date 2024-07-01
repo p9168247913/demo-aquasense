@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   Avatar,
   Box,
@@ -11,28 +11,28 @@ import {
   InputAdornment,
   MenuItem,
   Modal,
-} from '@mui/material';
-import { Visibility, VisibilityOff, Edit } from '@mui/icons-material';
-import { styled } from '@mui/system';
+} from '@mui/material'
+import { Visibility, VisibilityOff, Edit } from '@mui/icons-material'
+import { styled } from '@mui/system'
 
 const roles = [
   { value: 'admin', label: 'Admin' },
   { value: 'user', label: 'User' },
   { value: 'guest', label: 'Guest' },
-];
+]
 
 const ProfileContainer = styled(Container)(({ theme }) => ({
   marginTop: theme.spacing(4),
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-}));
+}))
 
 const ProfileAvatar = styled(Avatar)(({ theme }) => ({
   width: theme.spacing(15),
   height: theme.spacing(15),
   marginBottom: theme.spacing(2),
-}));
+}))
 
 const modalStyle = {
   position: 'absolute',
@@ -43,13 +43,12 @@ const modalStyle = {
   bgcolor: 'background.paper',
   boxShadow: 24,
   p: 4,
-};
-
+}
 
 const Profile = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [open, setOpen] = useState(false)
   const [profile, setProfile] = useState({
     name: 'John Doe',
     email: 'johndoe@example.com',
@@ -59,29 +58,27 @@ const Profile = () => {
     password: 'password123',
     confirmPassword: 'password123',
     profileImage: '',
-  });
+  })
 
   const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
-  };
+    setProfile({ ...profile, [e.target.name]: e.target.value })
+  }
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+  const handleClickShowPassword = () => setShowPassword(!showPassword)
+  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword)
 
   const handleMouseDownPassword = (event) => {
-    event.preventDefault();
-  };
+    event.preventDefault()
+  }
 
   const handleSaveChanges = () => {
     // Handle save changes logic here
-    console.log(profile);
-    handleClose();
-  };
+    console.log(profile)
+    handleClose()
+  }
 
   const handleOpen = () => setOpen(true)
   const handleClose = () => setOpen(false)
-
-
 
   return (
     <ProfileContainer>
@@ -310,4 +307,4 @@ const Profile = () => {
   )
 }
 
-export default Profile;
+export default Profile
